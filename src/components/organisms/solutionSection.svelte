@@ -1,22 +1,38 @@
 <script>
+	import { Bell, Camera, LayoutGrid, UserCheck, Users, Wallet } from '@lucide/svelte';
   import Container from '../atoms/container.svelte';
   import FeatureItem from '../molecules/featureItem.svelte';
 
   const features = [
     {
-      icon: '💌',
+      Icon: Bell,
       title: 'Save the Date',
       description: 'Convites digitais com lembretes automáticos.'
     },
     {
-      icon: '👥',
+      Icon: Users,
       title: 'Lista de Convidados',
-      description: 'Confirmação de presença simples e intuitiva.'
+      description: 'Organize sua lista de convidados com facilidade.'
     },
     {
-      icon: '🎁',
+      Icon: UserCheck,
+      title: 'Confirmação de Presença',
+      description: 'Confirmação de presença simples e intuitiva por whatsapp ou email.'
+    },
+    {
+      Icon: LayoutGrid,
+      title: 'Organização de Mesas',
+      description: 'Distribua seus convidados nas mesas de forma visual e intuitiva.'
+    },
+    {
+      Icon: Wallet,
       title: 'Lista de Presentes',
-      description: 'Opção de PIX integrado.'
+      description: 'Controle de presentes e opção de PIX integrado.'
+    },
+    {
+      Icon: Camera,
+      title: 'Galeria Compartilhada',
+      description: 'Todas as fotos da festa reunidas em um só álbum digital'
     }
   ];
 </script>

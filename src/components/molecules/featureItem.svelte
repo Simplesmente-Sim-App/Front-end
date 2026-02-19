@@ -1,6 +1,4 @@
 <script>
-  import IconCircle from '../atoms/iconCircle.svelte';
-
   let { Icon, title, description } = $props();
 </script>
 
@@ -19,9 +17,15 @@
   flex-direction: column;
   align-items: center;
   padding: 30px;
-  background: #ffffff;
+  background: rgb(250, 247, 245);
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(231, 224, 218, 0.5);
+  transition: all 0.3s ease;
+
+  &:hover {
+    scale: 1.05;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  }
 
     .icon {
       background-color: rgba(209, 148, 158, 0.15);

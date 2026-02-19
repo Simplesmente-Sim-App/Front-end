@@ -5,6 +5,7 @@
 </script>
 
 <a {href} onclick={() => gtag('event', 'market_research_click')} class="cta-button">
+
   <Heart size="20" color="white" class="icon"/>
   {text}
 </a>
@@ -16,9 +17,7 @@
     gap: 0.5rem;
     font-size: 1.125rem;
     padding: 0.75rem 1.5rem;
-    
     scale: 1.5;
-
     background-image: linear-gradient(135deg, hsl(350 45% 65%) 0%, hsl(350 50% 58%) 100%);
     box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px;
     color: white;

@@ -4,7 +4,8 @@
   let {children = () => "", href = "#pesquisa", text = "Responder pesquisa (5 minutos)", ...props} = $props();
 </script>
 
-<a {href} class="cta-button">
+<a {href} onclick={() => gtag('event', 'market_research_click')} class="cta-button">
+
   <Heart size="20" color="white" class="icon"/>
   {text}
 </a>
@@ -25,6 +26,12 @@
     font-weight: 500;
     transition: all 0.3s ease;
     cursor: pointer;
+
+    @media (max-width: 800px) {
+      scale: 1.4;
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+    }
 
     .icon {
       width: 1.25rem;

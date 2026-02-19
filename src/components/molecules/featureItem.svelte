@@ -1,11 +1,13 @@
 <script>
   import IconCircle from '../atoms/iconCircle.svelte';
 
-  let { icon, title, description } = $props();
+  let { Icon, title, description } = $props();
 </script>
 
 <div class="feature">
-  <IconCircle {icon} />
+  <div class="icon">
+    <Icon color="rgba(209, 148, 158, 1)" />
+  </div>
   <h3>{title}</h3>
   <p>{description}</p>
 </div>
@@ -20,6 +22,15 @@
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+
+    .icon {
+      background-color: rgba(209, 148, 158, 0.15);
+      border-radius: 20px;
+      padding: 12px;
+      justify-content: center;
+      align-items: center;
+      display: flex;
+    }
 
   h3 {
     margin-top: 16px;

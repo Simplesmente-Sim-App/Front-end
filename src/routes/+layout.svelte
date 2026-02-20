@@ -1,5 +1,5 @@
 <script>
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/favicon.ico';
 	import '../styles/global.scss';
 	import ConsentPopup from "../components/atoms/ConsentPopup.svelte";
 	
@@ -7,6 +7,7 @@
 </script>
 
 <svelte:head>
+	<title>Simplesmente Sim - Organize seu casamento sem planilhas.</title>
 	<link rel="icon" href={favicon} />
 
 	<!-- Google Tag Manager -->

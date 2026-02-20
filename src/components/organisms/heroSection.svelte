@@ -2,7 +2,7 @@
   import Container from '../atoms/container.svelte';
   import Button from '../atoms/button.svelte';
   import IconCircle from '../atoms/iconCircle.svelte';
-  import { Heart } from '@lucide/svelte';
+  import { Heart, Pointer } from '@lucide/svelte';
 	import { Tween } from 'svelte/motion';
 	import { onMount } from 'svelte';
 	import CTAButton from '../atoms/CTAButton.svelte';
@@ -43,6 +43,10 @@ async function pulse() {
       <div class="mouse-indicator__container">
         <div class="mouse-indicator__dot"></div>
       </div>
+    </div>
+
+    <div class="hand-indicator">
+      <Pointer  width={32} height={32} />
     </div>
   </Container>
 </section>
@@ -94,6 +98,41 @@ $primary: #ce5065;
     border-radius: 9999px;
     margin-top: 0.5rem;
     animation: pulse-soft 2s ease-in-out infinite;
+  }
+}
+
+.hand-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: rotateZ(-30deg);
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes finger-scroll {
+  0% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+
+  50% {
+    transform: translateY(4px);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
   }
 }
 

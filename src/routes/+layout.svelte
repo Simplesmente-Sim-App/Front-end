@@ -1,6 +1,7 @@
 <script>
 	import favicon from '$lib/assets/favicon.svg';
 	import '../styles/global.scss';
+	import ConsentPopup from "../components/atoms/ConsentPopup.svelte";
 	
 	let { children } = $props();
 </script>
@@ -22,7 +23,7 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
+	
   gtag('config', 'G-VD32QN5YHV');
 </script>
 
@@ -35,5 +36,5 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe>
 </noscript>
 <!-- End Google Tag Manager (noscript) -->
 
-
+<ConsentPopup />
 {@render children()};

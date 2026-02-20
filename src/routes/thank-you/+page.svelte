@@ -1,10 +1,9 @@
 <script>
-  import Container from '../atoms/container.svelte';
-  import IconCircle from '../atoms/iconCircle.svelte';
-  import { Heart, Pointer } from '@lucide/svelte';
+  import Container from '../../components/atoms/container.svelte';
+  import IconCircle from '../../components/atoms/iconCircle.svelte';
+  import { Heart } from '@lucide/svelte';
 	import { Tween } from 'svelte/motion';
 	import { onMount } from 'svelte';
-	import CTAButton from '../atoms/CTAButton.svelte';
 
   const size = new Tween(32);
 
@@ -28,28 +27,14 @@ async function pulse() {
   </IconCircle>
   <Container>
     <h1>
-      Organize seu casamento sem planilhas,
-      grupos caóticos e dor de cabeça.
+      Muito Obrigado pela sua resposta! <br />
+      Estamos muito felizes em ter você com a gente nessa jornada.
     </h1>
 
     <p>
-      Estamos criando um app que centraliza convidados,
-      presença, presentes e fotos do seu grande dia. <br /><br />
-      Seu casamento começa hoje, na organização.
+      Esperamos que o app que estamos criando torne a organização do seu casamento mais fácil, leve e até divertida. <br /><br />
+      Fique de olho no seu email, vamos enviar atualizações sobre o desenvolvimento do app e, claro, avisar quando ele estiver disponível para download.
     </p>
-
-    <CTAButton href="https://forms.gle/ckQrXLZ7NkwSeDeD6"/>
-    <div class="mouse-indicator">
-      <div class="mouse-indicator__container">
-        <div class="mouse-indicator__dot"></div>
-      </div>
-    </div>
-
-    <div class="hand-indicator">
-      <div class="hand-indicator__container">
-        <Pointer rotate={-35} color="#d799a2" width={32} height={32} />
-      </div>
-    </div>
   </Container>
 </section>
 

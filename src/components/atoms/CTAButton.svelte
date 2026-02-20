@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { Heart } from '@lucide/svelte';
 
-  
-
 	let {
 		children = () => '',
 		href = '#pesquisa',
@@ -13,12 +11,6 @@
 
 <a
 	{href}
-	onclick={() => {
-		gtag('event', 'generate_lead');
-		window.dataLayer.push({
-			event: 'generate_lead'
-		});
-	}}
 	class="cta-button"
 >
 	<Heart size="16" color="white" class="icon" />
@@ -30,7 +22,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
-		font-size: 1.125rem;
+		font-size: 1rem;
 		padding: 1rem 1.5rem;
 
 		scale: 1.4;

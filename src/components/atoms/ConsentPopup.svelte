@@ -3,7 +3,7 @@
 
   let visible = false;
 
-  const STORAGE_KEY = "cookie-consent";
+  const STORAGE_KEY = "cookie_consent";
 
   onMount(() => {
     const consent = localStorage.getItem(STORAGE_KEY);
@@ -16,7 +16,10 @@
   });
 
   function accept() {
-    localStorage.setItem(STORAGE_KEY, "accepted");
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      ad_storage: 'granted',
+      analytics_storage: 'granted'
+    }));
     visible = false;
     gtag('consent', 'update', {
       ad_storage: 'granted',
@@ -25,7 +28,10 @@
   }
 
   function decline() {
-    localStorage.setItem(STORAGE_KEY, "declined");
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      ad_storage: 'denied',
+      analytics_storage: 'denied'
+    }));
     visible = false;
   }
 

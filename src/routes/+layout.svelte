@@ -17,12 +17,19 @@
 	
 	  // Set default consent to 'denied' as a placeholder
 	  // Determine actual values based on your own requirements
-	  gtag('consent', 'default', {
-	    'ad_storage': 'denied',
-	    'ad_user_data': 'denied',
-	    'ad_personalization': 'denied',
-	    'analytics_storage': 'denied'
-	  });
+
+		const consent = JSON.parse(window.localStorage.getItem("cookie_consent"))
+
+		if(consent) {
+			gtag('consent', 'default', consent)
+		} else {	
+			gtag('consent', 'default', {
+				'ad_storage': 'denied',
+				'ad_user_data': 'denied',
+				'ad_personalization': 'denied',
+				'analytics_storage': 'denied'
+			});
+		}
 	</script>
 
 	<!-- Google Tag Manager -->

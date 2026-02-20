@@ -1,6 +1,5 @@
 <script>
   import Container from '../atoms/container.svelte';
-  import Button from '../atoms/button.svelte';
   import IconCircle from '../atoms/iconCircle.svelte';
   import { Heart, Pointer } from '@lucide/svelte';
 	import { Tween } from 'svelte/motion';
@@ -35,7 +34,8 @@ async function pulse() {
 
     <p>
       Estamos criando um app que centraliza convidados,
-      presença, presentes e fotos do seu grande dia.
+      presença, presentes e fotos do seu grande dia. <br /><br />
+      Seu casamento começa hoje, na organização.
     </p>
 
     <CTAButton href="https://forms.gle/ckQrXLZ7NkwSeDeD6"/>
@@ -46,7 +46,9 @@ async function pulse() {
     </div>
 
     <div class="hand-indicator">
-      <Pointer  width={32} height={32} />
+      <div class="hand-indicator__container">
+        <Pointer rotate={-35} color="#d799a2" width={32} height={32} />
+      </div>
     </div>
   </Container>
 </section>
@@ -81,6 +83,10 @@ $primary: #ce5065;
   animation: fade-in-up 0.6s ease forwards;
   animation-delay: 0.6s;
 
+  @media (max-width: 600px) {
+    display: none;
+  }
+
   &__container {
     width: 1.5rem;
     height: 2.5rem;
@@ -102,10 +108,28 @@ $primary: #ce5065;
 }
 
 .hand-indicator {
+  margin-top: 4rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  transform: rotateZ(-30deg);
+  animation: fade-in-up 0.6s ease forwards;
+  opacity: 0;
+  
+  animation-delay: 0.8s;
+
+  @media (min-width: 600px) {
+    display: none;
+  }
+  
+  &__container {
+    transform: rotateZ(-30deg);
+    animation: pulse-soft-rotate 2s ease-in-out infinite;
+    }
+  
+  svg {
+    animation: fade-in-up 0.6s ease forwards;
+    animation-delay: 1s;
+  }
 }
 
 @keyframes fade-in-up {
@@ -119,31 +143,14 @@ $primary: #ce5065;
   }
 }
 
-@keyframes finger-scroll {
-  0% {
-    transform: translateY(0);
-    opacity: 0.4;
+@keyframes pulse-soft-rotate {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translateY(0) rotate(-30deg);
   }
-
   50% {
-    transform: translateY(4px);
     opacity: 1;
-  }
-
-  100% {
-    transform: translateY(0);
-    opacity: 0.4;
-  }
-}
-
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+    transform: translateY(6px) rotate(-60deg);
   }
 }
 

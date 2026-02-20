@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { Heart } from '@lucide/svelte';
 
-  
-
 	let {
 		children = () => '',
 		href = '#pesquisa',
@@ -30,7 +28,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
-		font-size: 1.125rem;
+		font-size: 1rem;
 		padding: 1rem 1.5rem;
 
 		scale: 1.4;

@@ -11,12 +11,6 @@
 
 <a
 	{href}
-	onclick={() => {
-		gtag('event', 'generate_lead');
-		window.dataLayer.push({
-			event: 'generate_lead'
-		});
-	}}
 	class="cta-button"
 >
 	<Heart size="16" color="white" class="icon" />

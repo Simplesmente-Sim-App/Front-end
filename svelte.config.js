@@ -5,21 +5,22 @@ import { sveltePreprocess } from 'svelte-preprocess';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	kit: { 
-		adapter: adapter(), 
+	kit: {
+		adapter: adapter(),
 		alias: {
-			'$lib/*': './src/*',
+			'$lib/*': './src/lib/*'
 		}
-	 },
-	preprocess: [mdsvex(), 
+	},
+	preprocess: [
+		mdsvex(),
 		sveltePreprocess({
-		defaults: {
-			style: 'scss',
-			script: 'typescript'
-		}
-	})
-	// vitePreprocess()
-],
+			defaults: {
+				style: 'scss',
+				script: 'typescript'
+			}
+		})
+		// vitePreprocess()
+	],
 	extensions: ['.svelte', '.svx']
 };
 

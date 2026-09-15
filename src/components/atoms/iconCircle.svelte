@@ -9,10 +9,10 @@
 
 <style lang="scss">
 .icon {
-  width: 60px;
-  height: 60px;
-  background: rgba(#c76a75, 0.1);
-  border-radius: 50%;
+  width: auto;
+  height: auto;
+  background: transparent;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;

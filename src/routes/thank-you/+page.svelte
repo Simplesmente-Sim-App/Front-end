@@ -1,7 +1,7 @@
 <script>
   import Container from '../../components/atoms/container.svelte';
   import IconCircle from '../../components/atoms/iconCircle.svelte';
-  import { Heart } from '@lucide/svelte';
+  import Heart from '@lucide/svelte/icons/heart';
 	import { Tween } from 'svelte/motion';
 	import { onMount } from 'svelte';
 
@@ -21,6 +21,12 @@ async function pulse() {
 
 </script>
 
+<svelte:head>
+  <title>Obrigado | Simplesmente Sim</title>
+  <meta name="robots" content="noindex,follow" />
+</svelte:head>
+
+<main>
 <section class="hero">
   <IconCircle>
     <Heart size={size.current} color="#AD1F3610" fill="#AD1F3660" />
@@ -37,6 +43,7 @@ async function pulse() {
     </p>
   </Container>
 </section>
+</main>
 
 <style lang="scss">
 .hero {

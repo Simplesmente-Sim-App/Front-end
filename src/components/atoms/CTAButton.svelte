@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Heart } from '@lucide/svelte';
+	import { ArrowRight } from '@lucide/svelte';
 
 	let {
 		children = () => '',
 		href = '#pesquisa',
-		text = 'Responder pesquisa (5 minutos)',
+		text = 'Participar da pesquisa',
 		...props
 	} = $props();
 </script>
@@ -13,7 +13,7 @@
 	{href}
 	class="cta-button"
 >
-	<Heart size="16" color="white" class="icon" />
+		<ArrowRight size="16" color="white" class="icon" />
 	{text}
 </a>
 
@@ -25,9 +25,9 @@
 		font-size: 1rem;
 		padding: 1rem 1.5rem;
 
-		scale: 1.4;
+		scale: 1;
 
-		background-image: linear-gradient(135deg, hsl(350 45% 65%) 0%, hsl(350 50% 58%) 100%);
+		background: #84000b;
 		box-shadow:
 			rgba(0, 0, 0, 0) 0px 0px 0px 0px,
 			rgba(0, 0, 0, 0) 0px 0px 0px 0px,
@@ -35,7 +35,7 @@
 			rgba(0, 0, 0, 0.1) 0px 4px 6px -4px;
 		color: white;
 		text-decoration: none;
-		border-radius: 1.5rem;
+		border-radius: 999px;
 		font-weight: 500;
 		transition: all 0.3s ease;
 		cursor: pointer;

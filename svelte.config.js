@@ -7,9 +7,8 @@ import { sveltePreprocess } from 'svelte-preprocess';
 const config = {
 	kit: { 
 		adapter: adapter(), 
-		alias: {
-			'$lib/*': './src/*',
-		}
+		// Inline small route styles so the initial render needs no separate CSS request.
+		inlineStyleThreshold: 4096
 	 },
 	preprocess: [mdsvex(), 
 		sveltePreprocess({

@@ -5,6 +5,19 @@
 
   const STORAGE_KEY = "cookie_consent";
 
+  function loadGoogleTagManager() {
+    if (document.getElementById('google-tag-manager')) return;
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+
+    const script = document.createElement('script');
+    script.id = 'google-tag-manager';
+    script.async = true;
+    script.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-W5GCLB27';
+    document.head.appendChild(script);
+  }
+
   onMount(() => {
     const consent = localStorage.getItem(STORAGE_KEY);
 
@@ -12,24 +25,38 @@
       setTimeout(() => {
         visible = true;
       }, 500);
+	} else {
+	  try {
+	    if (JSON.parse(consent).analytics_storage === 'granted') loadGoogleTagManager();
+	  } catch {
+	    localStorage.removeItem(STORAGE_KEY);
+	    visible = true;
+	  }
     }
   });
 
   function accept() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       ad_storage: 'granted',
+	  ad_user_data: 'granted',
+	  ad_personalization: 'granted',
       analytics_storage: 'granted'
     }));
     visible = false;
     gtag('consent', 'update', {
       ad_storage: 'granted',
+	  ad_user_data: 'granted',
+	  ad_personalization: 'granted',
       analytics_storage: 'granted'
     });
+	loadGoogleTagManager();
   }
 
   function decline() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       ad_storage: 'denied',
+	  ad_user_data: 'denied',
+	  ad_personalization: 'denied',
       analytics_storage: 'denied'
     }));
     visible = false;
@@ -38,24 +65,23 @@
 </script>
 
 {#if visible}
-  <div class="consent">
+  <div class="consent" role="dialog" aria-modal="true" aria-labelledby="cookie-title" aria-describedby="cookie-description">
     <div class="consent__box">
 
       <div class="consent__content">
-        <h3>🍪 Consentimento de Cookies</h3>
+        <h2 id="cookie-title">Preferências de cookies</h2>
 
-        <p>
-          Usamos cookies para melhorar sua experiência.
-          Isso nos ajuda a entender melhor nossos usuários e criar um produto cada vez melhor.
+        <p id="cookie-description">
+          Usamos cookies de análise para entender como o site é utilizado. Você pode aceitar ou recusar.
         </p>
       </div>
 
       <div class="consent__actions">
-        <button class="consent__button consent__button--decline" on:click={decline}>
+        <button type="button" class="consent__button consent__button--decline" onclick={decline}>
           Recusar
         </button>
 
-        <button class="consent__button consent__button--accept" on:click={accept}>
+        <button type="button" class="consent__button consent__button--accept" onclick={accept}>
           Aceitar
         </button>
       </div>
@@ -87,7 +113,7 @@
       0 4px 10px rgba(0,0,0,0.1);
   }
 
-  .consent__content h3 {
+  .consent__content h2 {
     margin: 0 0 6px;
     font-size: 18px;
   }
@@ -119,13 +145,18 @@
   }
 
   .consent__button--accept {
-    background: #cc7180;
+    background: #84000b;
     color: white;
     font-size: 14px;
   }
 
   .consent__button:hover {
     opacity: 0.9;
+  }
+
+  .consent__button:focus-visible {
+    outline: 2px solid #84000b;
+    outline-offset: 2px;
   }
 
   @keyframes slide-up {

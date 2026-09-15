@@ -39,4 +39,20 @@ npm run build
 
 You can preview the production build with `npm run preview`.
 
+## Lighthouse
+
+Para avaliar a página com os arquivos otimizados de produção:
+
+```sh
+pnpm preview:production
+```
+
+Abra `http://127.0.0.1:4173/` em um perfil do Chrome sem extensões e execute o Lighthouse.
+Esse comando faz um novo build antes de iniciar o preview. O servidor `pnpm dev`
+na porta 5173 inclui ferramentas de desenvolvimento, módulos sem minificação e
+atualização de CSS em tempo real, o que altera as medições de desempenho e layout.
+
+Os cabeçalhos de cache definidos em `vercel.json` são aplicados pela Vercel;
+o preview local do Vite não reproduz esses cabeçalhos.
+
 > To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.

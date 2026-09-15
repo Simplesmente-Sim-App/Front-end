@@ -31,6 +31,16 @@
   --font-body: 'Inter', system-ui, sans-serif;
 }
 
+::selection {
+  background: #cc8799;
+  color: #76101b;
+}
+
+::-moz-selection {
+  background: #cc8799;
+  color: #76101b;
+}
+
 body {
   // background: #f6f1f1;
   background-color: #f8eddf;

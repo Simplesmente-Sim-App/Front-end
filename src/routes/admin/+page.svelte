@@ -16,10 +16,23 @@
   let loginLoading = false;
   let error = '';
 
+  function errorMessage(cause: unknown, context: 'login' | 'dashboard'): string {
+    if (cause instanceof ApiError) {
+      if (context === 'login' && (cause.status === 401 || cause.status === 403)) return 'E-mail ou senha inválidos.';
+      if (cause.status === 403) return 'Sua conta não tem permissão para acessar o painel.';
+      if (cause.status === 401) return 'Sua sessão expirou. Entre novamente.';
+      if (cause.status >= 500) return 'O serviço está indisponível no momento. Tente novamente em instantes.';
+    }
+    if (cause instanceof TypeError) return 'Não foi possível conectar ao serviço. Verifique sua conexão e tente novamente.';
+    return context === 'login' ? 'Não foi possível entrar agora. Tente novamente.' : 'Não foi possível carregar os dados do painel.';
+  }
+
   onMount(async () => {
     token = localStorage.getItem('simplesmente-sim-admin-token') ?? '';
     const savedUser = localStorage.getItem('simplesmente-sim-admin-user');
-    if (savedUser) user = JSON.parse(savedUser);
+    if (savedUser) {
+      try { user = JSON.parse(savedUser); } catch { localStorage.removeItem('simplesmente-sim-admin-user'); }
+    }
     if (token) await loadDashboard(); else loading = false;
   });
 
@@ -27,17 +40,25 @@
     loading = true; error = '';
     try {
       [overview,] = await Promise.all([adminApi.overview(token), adminApi.suppliers(token).then((page) => { suppliers = page.content; })]);
-    } catch (cause) { error = cause instanceof ApiError && cause.status === 401 ? 'Sua sessão expirou. Entre novamente.' : 'Não foi possível carregar os dados do painel.'; if (cause instanceof ApiError && cause.status === 401) logout(); }
+    } catch (cause) { error = errorMessage(cause, 'dashboard'); if (cause instanceof ApiError && (cause.status === 401 || cause.status === 403)) logout(); }
     finally { loading = false; }
   }
 
   async function login() {
-    loginLoading = true; error = '';
+    if (loginLoading) return;
+    error = '';
+    if (!email.trim() || !password) { error = 'Informe seu e-mail e sua senha.'; return; }
+    loginLoading = true;
     try {
-      const response = await adminApi.login(email, password);
+      const response = await adminApi.login(email.trim(), password);
       if (response.role !== 'ADMIN') throw new Error('Esta conta não possui acesso administrativo.');
-      token = response.token; user = response; localStorage.setItem('simplesmente-sim-admin-token', token); localStorage.setItem('simplesmente-sim-admin-user', JSON.stringify(response)); await loadDashboard();
-    } catch (cause) { error = cause instanceof Error ? cause.message : 'Não foi possível entrar.'; }
+      token = response.token;
+      user = response;
+      localStorage.setItem('simplesmente-sim-admin-token', token);
+      localStorage.setItem('simplesmente-sim-admin-user', JSON.stringify(response));
+      password = '';
+      await loadDashboard();
+    } catch (cause) { error = cause instanceof Error && !(cause instanceof ApiError) ? cause.message : errorMessage(cause, 'login'); token = ''; user = null; localStorage.removeItem('simplesmente-sim-admin-token'); localStorage.removeItem('simplesmente-sim-admin-user'); }
     finally { loginLoading = false; }
   }
 
@@ -47,7 +68,7 @@
 <svelte:head><title>Administração | Simplesmente Sim</title><meta name="robots" content="noindex,nofollow" /></svelte:head>
 
 {#if !token}
-  <main class="login-page"><section class="login-card" aria-labelledby="login-title"><img src="/logo-favicon.svg" alt="" /><span class="eyebrow">Área restrita</span><h1 id="login-title">Acesso administrativo</h1><p>Entre com uma conta ADMIN para gerenciar os recursos da plataforma.</p><form onsubmit={(event) => { event.preventDefault(); login(); }}><label for="email">E-mail</label><input id="email" type="email" bind:value={email} autocomplete="email" required /><label for="password">Senha</label><input id="password" type="password" bind:value={password} autocomplete="current-password" required /><button type="submit" disabled={loginLoading}>{loginLoading ? 'Entrando...' : 'Entrar no painel'}</button>{#if error}<p class="error" role="alert">{error}</p>{/if}</form></section></main>
+  <main class="login-page"><section class="login-card" aria-labelledby="login-title"><img src="/logo-favicon.svg" alt="" /><span class="eyebrow">Área restrita</span><h1 id="login-title">Acesso administrativo</h1><p>Entre com uma conta ADMIN para gerenciar os recursos da plataforma.</p><form aria-busy={loginLoading} onsubmit={(event) => { event.preventDefault(); login(); }}><label for="email">E-mail</label><input id="email" type="email" bind:value={email} autocomplete="email" aria-invalid={Boolean(error)} aria-describedby={error ? 'login-error' : undefined} required /><label for="password">Senha</label><input id="password" type="password" bind:value={password} autocomplete="current-password" aria-invalid={Boolean(error)} aria-describedby={error ? 'login-error' : undefined} required /><button type="submit" disabled={loginLoading}>{loginLoading ? 'Entrando...' : 'Entrar no painel'}</button>{#if error}<p id="login-error" class="error" role="alert">{error}</p>{/if}</form></section></main>
 {:else}
   <AdminShell userName={user?.name ?? 'Administrador'} onLogout={logout}>
     <div class="page-heading"><div><span class="eyebrow">Workspace administrativo</span><h1>Visão geral</h1><p>Acompanhe a operação e os recursos disponíveis no Simplesmente Sim.</p></div><button class="refresh" type="button" onclick={loadDashboard}>Atualizar dados</button></div>

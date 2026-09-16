@@ -3,7 +3,10 @@ import type { AuthResponse, OperationOverview, Page, Supplier, SupplierCategory,
 const API_URL = import.meta.env.VITE_API_URL ?? 'https://api.simplesmentesim.com';
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) { super(message); }
+  constructor(public status: number, message: string, public code?: string) {
+    super(message);
+    this.name = 'ApiError';
+  }
 }
 
 async function request<T>(path: string, options: RequestInit = {}, token?: string): Promise<T> {
@@ -13,7 +16,8 @@ async function request<T>(path: string, options: RequestInit = {}, token?: strin
   });
   if (!response.ok) {
     const body = await response.json().catch(() => null);
-    throw new ApiError(response.status, body?.message ?? `Erro ${response.status}`);
+    const message = body?.message ?? body?.error ?? body?.detail;
+    throw new ApiError(response.status, typeof message === 'string' ? message : `Erro ${response.status}`, body?.code);
   }
   if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;

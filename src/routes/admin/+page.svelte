@@ -1,0 +1,70 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import AdminShell from '../../components/templates/adminShell.svelte';
+  import AdminMetricCard from '../../components/molecules/adminMetricCard.svelte';
+  import AdminStatusBadge from '../../components/atoms/adminStatusBadge.svelte';
+  import { adminApi, ApiError } from '$lib/admin/api';
+  import type { AuthResponse, OperationOverview, Supplier } from '$lib/admin/types';
+
+  let token = '';
+  let user: AuthResponse | null = null;
+  let email = '';
+  let password = '';
+  let overview: OperationOverview | null = null;
+  let suppliers: Supplier[] = [];
+  let loading = true;
+  let loginLoading = false;
+  let error = '';
+
+  onMount(async () => {
+    token = localStorage.getItem('simplesmente-sim-admin-token') ?? '';
+    const savedUser = localStorage.getItem('simplesmente-sim-admin-user');
+    if (savedUser) user = JSON.parse(savedUser);
+    if (token) await loadDashboard(); else loading = false;
+  });
+
+  async function loadDashboard() {
+    loading = true; error = '';
+    try {
+      [overview,] = await Promise.all([adminApi.overview(token), adminApi.suppliers(token).then((page) => { suppliers = page.content; })]);
+    } catch (cause) { error = cause instanceof ApiError && cause.status === 401 ? 'Sua sessão expirou. Entre novamente.' : 'Não foi possível carregar os dados do painel.'; if (cause instanceof ApiError && cause.status === 401) logout(); }
+    finally { loading = false; }
+  }
+
+  async function login() {
+    loginLoading = true; error = '';
+    try {
+      const response = await adminApi.login(email, password);
+      if (response.role !== 'ADMIN') throw new Error('Esta conta não possui acesso administrativo.');
+      token = response.token; user = response; localStorage.setItem('simplesmente-sim-admin-token', token); localStorage.setItem('simplesmente-sim-admin-user', JSON.stringify(response)); await loadDashboard();
+    } catch (cause) { error = cause instanceof Error ? cause.message : 'Não foi possível entrar.'; }
+    finally { loginLoading = false; }
+  }
+
+  function logout() { localStorage.removeItem('simplesmente-sim-admin-token'); localStorage.removeItem('simplesmente-sim-admin-user'); token = ''; user = null; overview = null; suppliers = []; }
+</script>
+
+<svelte:head><title>Administração | Simplesmente Sim</title><meta name="robots" content="noindex,nofollow" /></svelte:head>
+
+{#if !token}
+  <main class="login-page"><section class="login-card" aria-labelledby="login-title"><img src="/logo-favicon.svg" alt="" /><span class="eyebrow">Área restrita</span><h1 id="login-title">Acesso administrativo</h1><p>Entre com uma conta ADMIN para gerenciar os recursos da plataforma.</p><form onsubmit={(event) => { event.preventDefault(); login(); }}><label for="email">E-mail</label><input id="email" type="email" bind:value={email} autocomplete="email" required /><label for="password">Senha</label><input id="password" type="password" bind:value={password} autocomplete="current-password" required /><button type="submit" disabled={loginLoading}>{loginLoading ? 'Entrando...' : 'Entrar no painel'}</button>{#if error}<p class="error" role="alert">{error}</p>{/if}</form></section></main>
+{:else}
+  <AdminShell userName={user?.name ?? 'Administrador'} onLogout={logout}>
+    <div class="page-heading"><div><span class="eyebrow">Workspace administrativo</span><h1>Visão geral</h1><p>Acompanhe a operação e os recursos disponíveis no Simplesmente Sim.</p></div><button class="refresh" type="button" onclick={loadDashboard}>Atualizar dados</button></div>
+    {#if error}<div class="alert" role="alert">{error}</div>{/if}
+    {#if loading}<div class="loading">Carregando dados da operação...</div>{:else}
+      <section class="metrics" aria-label="Métricas da operação"><AdminMetricCard label="Eventos totais" value={overview?.totalEvents ?? 0} detail="Registrados pela aplicação" /><AdminMetricCard label="Últimas 24 horas" value={overview?.last24HoursEvents ?? 0} detail="Eventos recentes" /><AdminMetricCard label="Falhas recentes" value={overview?.last24HoursFailures ?? 0} detail="Requerem acompanhamento" tone={overview?.last24HoursFailures ? 'warning' : 'default'} /><AdminMetricCard label="Fornecedores" value={suppliers.length} detail="Na primeira página" /></section>
+      <section class="panel"><div class="panel-heading"><div><h2>Fornecedores recentes</h2><p>Recursos gerenciados pelo catálogo administrativo.</p></div><a href="/admin/suppliers">Ver todos</a></div>{#if suppliers.length}<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Categoria</th><th>Status</th></tr></thead><tbody>{#each suppliers as supplier}<tr><td><strong>{supplier.name}</strong><small>{supplier.description ?? 'Sem descrição cadastrada'}</small></td><td>{supplier.category}</td><td><AdminStatusBadge status={supplier.status} /></td></tr>{/each}</tbody></table></div>{:else}<div class="empty">Nenhum fornecedor encontrado.</div>{/if}</section>
+    {/if}
+  </AdminShell>
+{/if}
+
+<style lang="scss">
+  .login-page { display: grid; min-height: 100vh; place-items: center; padding: 1.5rem; background: #f5f6f4; }
+  .login-card { width: min(100%, 420px); padding: 2.25rem; background: #fff; border: 1px solid #e7e9e6; border-radius: 14px; box-shadow: 0 18px 50px rgba(52,50,44,.08); }
+  .login-card > img { display: block; width: 48px; height: 48px; margin-bottom: 2rem; object-fit: contain; }
+  .eyebrow { color: #b2475e; font-size: .67rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+  h1 { margin-top: .5rem; color: #26322f; font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -.04em; }
+  .login-card > p, .page-heading p, .panel-heading p { margin-top: .55rem; color: #78817e; font-size: .86rem; line-height: 1.55; }
+  form { display: grid; gap: .45rem; margin-top: 1.75rem; } label { margin-top: .55rem; color: #4d5955; font-size: .78rem; font-weight: 600; } input { height: 44px; padding: 0 .8rem; border: 1px solid #dfe4e1; border-radius: 7px; color: #26322f; background: #fbfcfb; font: inherit; } button { height: 44px; margin-top: .85rem; border: 0; border-radius: 7px; color: #fff; background: #84000b; font: inherit; font-weight: 700; cursor: pointer; } button:disabled { opacity: .65; cursor: wait; } button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid #cc8799; outline-offset: 2px; } .error, .alert { color: #8e3b32; font-size: .78rem; } .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 1.75rem; } .page-heading h1 { font-size: clamp(2rem, 4vw, 2.7rem); } .refresh { margin: 0; padding: 0 1rem; color: #84000b; background: #f9e8eb; } .loading, .empty { padding: 3rem; color: #78817e; text-align: center; } .alert { margin-bottom: 1rem; padding: .85rem 1rem; border: 1px solid #f0c5c2; border-radius: 8px; background: #fff3f1; } .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; } .panel { margin-top: 1rem; padding: 1.25rem; background: #fff; border: 1px solid #e7e9e6; border-radius: 12px; } .panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; } h2 { color: #26322f; font-size: 1.1rem; } .panel-heading a { color: #84000b; font-size: .78rem; font-weight: 700; text-decoration: none; } .table-wrap { overflow-x: auto; } table { width: 100%; border-collapse: collapse; font-size: .8rem; } th { color: #9aa19f; font-size: .68rem; letter-spacing: .08em; text-align: left; text-transform: uppercase; } th, td { padding: .8rem .5rem; border-bottom: 1px solid #eef0ee; } td { color: #65706c; } td strong, td small { display: block; } td strong { color: #35413d; } td small { margin-top: .25rem; color: #9aa19f; font-size: .72rem; } @media (max-width: 900px) { .metrics { grid-template-columns: repeat(2, 1fr); } } @media (max-width: 600px) { .page-heading { align-items: flex-start; flex-direction: column; } .metrics { grid-template-columns: 1fr 1fr; gap: .65rem; } :global(.metric-card) { padding: .9rem; } .panel { padding: .85rem; } :global(.account > span:last-child) { display: none; } }
+</style>

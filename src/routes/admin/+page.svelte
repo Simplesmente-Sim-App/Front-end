@@ -188,13 +188,13 @@
 					disabled={loading}
 					aria-busy={loading}
 					>{#if loading}<span class="loading-spinner" aria-hidden="true"
-						></span>Atualizando...{:else}Atualizar dados{/if}</button
-				>{#if !loading}{#key refreshCycle}<span
-							class="refresh-progress"
-							role="progressbar"
-							aria-label="Próxima atualização automática"
-							onanimationend={refreshData}
-						></span>{/key}{/if}
+						></span>Atualizando...{:else}Atualizar dados{/if}{#if !loading}{#key refreshCycle}<span
+								class="refresh-progress"
+								role="progressbar"
+								aria-label="Próxima atualização automática"
+								onanimationend={refreshData}
+							></span>{/key}{/if}</button
+				>
 			</div>
 		</div>
 		{#if error}<div class="alert" role="alert">{error}</div>{/if}
@@ -510,8 +510,9 @@
 	}
 	.refresh {
 		width: 100%;
-	}
-	.refresh {
+		height: auto;
+		min-height: 44px;
+		padding: 0.65rem 1rem 0.55rem;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -530,8 +531,8 @@
 		width: 100%;
 		height: 3px;
 		border-radius: 999px;
-		background: #f1d7dc;
-		transform-origin: right;
+		background: #650008;
+		transform-origin: left;
 		animation: refresh-countdown 20s linear forwards;
 	}
 	@keyframes refresh-countdown {

@@ -4,7 +4,7 @@
 	
 	let { children } = $props();
 	const siteUrl = 'https://simplesmentesim.com';
-	const title = 'Guia da Noiva e newsletter | Simplesmente Sim';
+	const title = 'Simplesmente Sim | Seu casamento sem estresse';
 	const description = 'Receba o Guia da Noiva e conteúdos para organizar seu casamento com mais clareza, do planejamento ao altar.';
 	const structuredData = {
 		'@context': 'https://schema.org',

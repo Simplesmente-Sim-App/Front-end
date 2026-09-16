@@ -504,6 +504,7 @@
 		}
 	}
 	.refresh-control {
+		position: relative;
 		display: grid;
 		width: 160px;
 		gap: 0.45rem;
@@ -527,6 +528,9 @@
 		animation: refresh-spinner 0.7s linear infinite;
 	}
 	.refresh-progress {
+		position: absolute;
+		bottom: 0;
+		left: 0;
 		display: block;
 		width: 100%;
 		height: 3px;

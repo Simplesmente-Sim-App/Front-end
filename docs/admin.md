@@ -8,7 +8,8 @@ Os contratos usados nesta primeira versão vêm de `back-end/docs/openapi-fronte
 
 - `POST /api/auth/login` para obter o JWT;
 - `GET /api/operations/overview` para as métricas da operação;
-- `GET /api/admin/suppliers` para a listagem inicial de fornecedores;
+- `GET /api/admin/users/summary` para a distribuição de usuários por plano;
+- `GET /api/admin/users` para a listagem inicial de usuários com filtros e paginação;
 - `GET /api/auth/me` está disponível no cliente para a próxima etapa de validação da sessão.
 
 O cliente HTTP está em `src/lib/admin/api.ts`, e os tipos correspondentes estão em `src/lib/admin/types.ts`. Os componentes de interface não fazem chamadas diretamente: a rota coordena carregamento, sessão e estados.

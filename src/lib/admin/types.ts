@@ -45,3 +45,18 @@ export type Supplier = {
 
 export type PageMetadata = { size: number; number: number; totalElements: number; totalPages: number };
 export type Page<T> = { content: T[]; page: PageMetadata };
+
+export type AdminUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: AdminRole;
+  emailVerified: boolean;
+  planCode: string | null;
+  planName: string | null;
+  subscriptionStatus: 'ACTIVE' | 'PAST_DUE' | 'CANCELED' | null;
+  createdAt: string;
+};
+
+export type AdminPlanSummary = { planCode: string; planName: string; userCount: number };
+export type AdminUserSummary = { totalUsers: number; usersWithoutPlan: number; byPlan: AdminPlanSummary[] };

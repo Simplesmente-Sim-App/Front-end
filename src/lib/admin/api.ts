@@ -1,4 +1,4 @@
-import type { AuthResponse, OperationOverview, Page, Supplier, SupplierCategory, SupplierStatus, UserProfile } from './types';
+import type { AdminUser, AdminUserSummary, AuthResponse, OperationOverview, Page, Supplier, SupplierCategory, SupplierStatus, UserProfile } from './types';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'https://api.simplesmentesim.com';
 
@@ -27,6 +27,14 @@ export const adminApi = {
   login: (email: string, password: string) => request<AuthResponse>('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
   me: (token: string) => request<UserProfile>('/api/auth/me', {}, token),
   overview: (token: string) => request<OperationOverview>('/api/operations/overview', {}, token),
+  userSummary: (token: string) => request<AdminUserSummary>('/api/admin/users/summary', {}, token),
+  users: (token: string, params: { query?: string; role?: 'USER' | 'ADMIN'; planCode?: string; page?: number; size?: number } = {}) => {
+    const search = new URLSearchParams({ page: String(params.page ?? 0), size: String(params.size ?? 8), sort: 'createdAt,desc' });
+    if (params.query) search.set('query', params.query);
+    if (params.role) search.set('role', params.role);
+    if (params.planCode) search.set('planCode', params.planCode);
+    return request<Page<AdminUser>>(`/api/admin/users?${search}`, {}, token);
+  },
   suppliers: (token: string, params: { query?: string; category?: SupplierCategory; status?: SupplierStatus; page?: number; size?: number } = {}) => {
     const search = new URLSearchParams({ page: String(params.page ?? 0), size: String(params.size ?? 8) });
     if (params.query) search.set('query', params.query);

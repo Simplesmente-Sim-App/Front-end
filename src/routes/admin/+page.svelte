@@ -248,8 +248,10 @@
 								<thead><tr><th>Usuário</th><th>Plano</th><th>Status</th></tr></thead><tbody
 									>{#each users as adminUser}<tr
 											><td
-												><strong>{adminUser.name || 'Sem nome'}</strong><small
-													>{adminUser.email}</small
+												><a class="user-link" href={`/admin/users/${adminUser.id}`}
+													><strong>{adminUser.name || 'Sem nome'}</strong><small
+														>{adminUser.email}</small
+													></a
 												></td
 											><td>{adminUser.planName ?? 'Sem plano'}</td><td
 												><AdminStatusBadge

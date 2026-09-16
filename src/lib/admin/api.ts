@@ -77,6 +77,8 @@ export const adminApi = {
 		if (params.planCode) search.set('planCode', params.planCode);
 		return request<Page<AdminUser>>(`/api/admin/users?${search}`, {}, token);
 	},
+	userDetails: (token: string, userId: string) =>
+		request<import('./types').AdminUserDetails>(`/api/admin/users/${userId}`, {}, token),
 	suppliers: (
 		token: string,
 		params: {

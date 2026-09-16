@@ -80,3 +80,14 @@ export type AdminUserSummary = {
 	usersWithoutPlan: number;
 	byPlan: AdminPlanSummary[];
 };
+
+export type AdminUserDetails = AdminUser & {
+	updatedAt: string;
+	subscriptionStartDate: string | null;
+	subscriptionEndDate: string | null;
+	ownedWeddings: number;
+	activeMemberWeddings: number;
+	events: number;
+	guests: number;
+	lastAccessAt: string | null;
+};

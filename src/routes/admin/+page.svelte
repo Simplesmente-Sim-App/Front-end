@@ -36,16 +36,9 @@
       try { const response = await adminApi.refresh(); if (response.role === 'ADMIN') { token = response.token; user = response; await loadDashboard(); } } catch { /* login required */ } finally { loading = false; }
     };
     void initialize();
-
-    const refreshTimer = window.setInterval(() => {
-      if (token && !loading) refreshData();
-    }, 20000);
-
-    return () => window.clearInterval(refreshTimer);
   });
 
   function refreshData() {
-    refreshCycle += 1;
     return loadDashboard();
   }
 
@@ -63,7 +56,7 @@
       }
       error = errorMessage(cause, 'dashboard'); if (cause instanceof ApiError && (cause.status === 401 || cause.status === 403)) await logout();
     }
-    finally { loading = false; }
+    finally { loading = false; refreshCycle += 1; }
   }
 
   async function login() {
@@ -91,7 +84,7 @@
   <main class="login-page"><section class="login-card" aria-labelledby="login-title"><img src="/logo-favicon.svg" alt="" /><span class="eyebrow">Área restrita</span><h1 id="login-title">Acesso administrativo</h1><p>Entre com uma conta ADMIN para gerenciar os recursos da plataforma.</p><form aria-busy={loginLoading} onsubmit={(event) => { event.preventDefault(); login(); }}><label for="email">E-mail</label><input id="email" type="email" bind:value={email} autocomplete="email" aria-invalid={Boolean(error)} aria-describedby={error ? 'login-error' : undefined} required /><label for="password">Senha</label><input id="password" type="password" bind:value={password} autocomplete="current-password" aria-invalid={Boolean(error)} aria-describedby={error ? 'login-error' : undefined} required /><label class="remember"><input type="checkbox" bind:checked={rememberMe} /> Lembrar de mim por 30 dias</label><button type="submit" disabled={loginLoading}>{loginLoading ? 'Entrando...' : 'Entrar no painel'}</button>{#if error}<p id="login-error" class="error" role="alert">{error}</p>{/if}</form></section></main>
 {:else}
   <AdminShell userName={user?.name ?? 'Administrador'} onLogout={logout}>
-    <div class="page-heading"><div><span class="eyebrow">Workspace administrativo</span><h1>Visão geral</h1><p>Acompanhe a operação e os recursos disponíveis no Simplesmente Sim.</p></div><div class="refresh-control"><button class="refresh" type="button" onclick={refreshData} disabled={loading} aria-busy={loading}>{#if loading}<span class="loading-spinner" aria-hidden="true"></span>Atualizando...{:else}Atualizar dados{/if}</button>{#key refreshCycle}<span class="refresh-progress" role="progressbar" aria-label="Próxima atualização automática" onanimationend={refreshData}></span>{/key}</div></div>
+    <div class="page-heading"><div><span class="eyebrow">Workspace administrativo</span><h1>Visão geral</h1><p>Acompanhe a operação e os recursos disponíveis no Simplesmente Sim.</p></div><div class="refresh-control"><button class="refresh" type="button" onclick={refreshData} disabled={loading} aria-busy={loading}>{#if loading}<span class="loading-spinner" aria-hidden="true"></span>Atualizando...{:else}Atualizar dados{/if}</button>{#if !loading}{#key refreshCycle}<span class="refresh-progress" role="progressbar" aria-label="Próxima atualização automática" onanimationend={refreshData}></span>{/key}{/if}</div></div>
     {#if error}<div class="alert" role="alert">{error}</div>{/if}
     {#if loading}<div class="loading">Carregando dados da operação...</div>{:else}
       <section class="metrics" aria-label="Métricas de usuários"><AdminMetricCard label="Usuários cadastrados" value={userSummary?.totalUsers ?? 0} detail="Contados sem duplicação" /><AdminMetricCard label="Sem plano" value={userSummary?.usersWithoutPlan ?? 0} detail="Precisam de acompanhamento" tone={userSummary?.usersWithoutPlan ? 'warning' : 'default'} /><AdminMetricCard label="Eventos totais" value={overview?.totalEvents ?? 0} detail="Registrados pela aplicação" /><AdminMetricCard label="Eventos recentes" value={overview?.last24HoursEvents ?? 0} detail="Últimas 24 horas" /></section>

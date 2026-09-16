@@ -47,11 +47,7 @@ body {
   // background: linear-gradient(180deg, rgba(246, 241, 241, 0.8) 0%, rgba(246, 241, 241, 0.8) 100%), #f6f1f1;
   font-family: var(--font-body);
   color: #3c2f2f;
-  overflow: hidden;
-  height: 100vh;
 }
-
-html { overflow: hidden; height: 100%; }
 
 h1, h2, h3 {
   font-family: var(--font-display);

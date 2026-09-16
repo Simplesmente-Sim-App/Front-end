@@ -1,5 +1,5 @@
 <script>
-  import HeroSection from '../organisms/heroSection.svelte';
+	import HeroSection from '../organisms/heroSection.svelte';
 </script>
 
 <HeroSection />

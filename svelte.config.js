@@ -5,20 +5,21 @@ import { sveltePreprocess } from 'svelte-preprocess';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	kit: { 
-		adapter: adapter(), 
+	kit: {
+		adapter: adapter(),
 		// Inline small route styles so the initial render needs no separate CSS request.
 		inlineStyleThreshold: 4096
-	 },
-	preprocess: [mdsvex(), 
+	},
+	preprocess: [
+		mdsvex(),
 		sveltePreprocess({
-		defaults: {
-			style: 'scss',
-			script: 'typescript'
-		}
-	})
-	// vitePreprocess()
-],
+			defaults: {
+				style: 'scss',
+				script: 'typescript'
+			}
+		})
+		// vitePreprocess()
+	],
 	extensions: ['.svelte', '.svx']
 };
 

@@ -1,19 +1,11 @@
 <script lang="ts">
 	import { ArrowRight } from '@lucide/svelte';
 
-	let {
-		children = () => '',
-		href = '#pesquisa',
-		text = 'Participar da pesquisa',
-		...props
-	} = $props();
+	let { href = '#pesquisa', text = 'Participar da pesquisa' } = $props();
 </script>
 
-<a
-	{href}
-	class="cta-button"
->
-		<ArrowRight size="16" color="white" class="icon" />
+<a {href} class="cta-button">
+	<ArrowRight size="16" color="white" class="icon" />
 	{text}
 </a>
 

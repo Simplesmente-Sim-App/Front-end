@@ -1,54 +1,56 @@
 @font-face {
-  font-family: 'Cormorant Garamond';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('/fonts/cormorant-garamond-latin.woff2') format('woff2');
+	font-family: 'Cormorant Garamond';
+	font-style: normal;
+	font-weight: 400 700;
+	font-display: swap;
+	src: url('/fonts/cormorant-garamond-latin.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Imperial Script';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/imperial-script-latin.woff2') format('woff2');
+	font-family: 'Imperial Script';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('/fonts/imperial-script-latin.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 300 600;
-  font-display: swap;
-  src: url('/fonts/inter-latin.woff2') format('woff2');
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 300 600;
+	font-display: swap;
+	src: url('/fonts/inter-latin.woff2') format('woff2');
 }
 
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
 
-  --font-display: 'Cormorant Garamond', Georgia, serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+	--font-display: 'Cormorant Garamond', Georgia, serif;
+	--font-body: 'Inter', system-ui, sans-serif;
 }
 
 ::selection {
-  background: #cc8799;
-  color: #76101b;
+	background: #cc8799;
+	color: #76101b;
 }
 
 ::-moz-selection {
-  background: #cc8799;
-  color: #76101b;
+	background: #cc8799;
+	color: #76101b;
 }
 
 body {
-  // background: #f6f1f1;
-  background-color: #f8eddf;
-  // background: linear-gradient(180deg, rgba(246, 241, 241, 0.8) 0%, rgba(246, 241, 241, 0.8) 100%), #f6f1f1;
-  font-family: var(--font-body);
-  color: #3c2f2f;
+	// background: #f6f1f1;
+	background-color: #f8eddf;
+	// background: linear-gradient(180deg, rgba(246, 241, 241, 0.8) 0%, rgba(246, 241, 241, 0.8) 100%), #f6f1f1;
+	font-family: var(--font-body);
+	color: #3c2f2f;
 }
 
-h1, h2, h3 {
-  font-family: var(--font-display);
+h1,
+h2,
+h3 {
+	font-family: var(--font-display);
 }

@@ -1,25 +1,12 @@
 <script>
 	import '../styles/global.scss';
-	import ConsentPopup from "../components/atoms/ConsentPopup.svelte";
-	
+	import ConsentPopup from '../components/atoms/ConsentPopup.svelte';
+
 	let { children } = $props();
 	const siteUrl = 'https://simplesmentesim.com';
 	const title = 'Simplesmente Sim | Seu casamento sem estresse';
-	const description = 'Receba o Guia da Noiva e conteúdos para organizar seu casamento com mais clareza, do planejamento ao altar.';
-	const structuredData = {
-		'@context': 'https://schema.org',
-		'@type': 'WebSite',
-		name: 'Simplesmente Sim',
-		url: siteUrl,
-		inLanguage: 'pt-BR',
-		description,
-		publisher: {
-			'@type': 'Organization',
-			name: 'Simplesmente Sim',
-			url: siteUrl,
-			logo: `${siteUrl}/logo-header.svg`
-		}
-	};
+	const description =
+		'Receba o Guia da Noiva e conteúdos para organizar seu casamento com mais clareza, do planejamento ao altar.';
 </script>
 
 <svelte:head>
@@ -30,9 +17,27 @@
 	<link rel="canonical" href={`${siteUrl}/`} />
 	<link rel="icon" type="image/svg+xml" href="/logo-favicon.svg" />
 	<link rel="manifest" href="/site.webmanifest" />
-	<link rel="preload" href="/fonts/cormorant-garamond-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
-	<link rel="preload" href="/fonts/imperial-script-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
-	<link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+	<link
+		rel="preload"
+		href="/fonts/cormorant-garamond-latin.woff2"
+		as="font"
+		type="font/woff2"
+		crossorigin="anonymous"
+	/>
+	<link
+		rel="preload"
+		href="/fonts/imperial-script-latin.woff2"
+		as="font"
+		type="font/woff2"
+		crossorigin="anonymous"
+	/>
+	<link
+		rel="preload"
+		href="/fonts/inter-latin.woff2"
+		as="font"
+		type="font/woff2"
+		crossorigin="anonymous"
+	/>
 	<link rel="preload" as="image" href="/logo-hero.svg" type="image/svg+xml" fetchpriority="high" />
 
 	<meta property="og:locale" content="pt_BR" />
@@ -50,30 +55,46 @@
 	<meta name="twitter:title" content={title} />
 	<meta name="twitter:description" content={description} />
 	<meta name="twitter:image" content={`${siteUrl}/logo-hero.jpg`} />
-	<script type="application/ld+json">{JSON.stringify(structuredData)}</script>
-
-	<script>
-	  // Define dataLayer and the gtag function.
-	  window.dataLayer = window.dataLayer || [];
-	  function gtag(){dataLayer.push(arguments);}
-	
-	  // Set default consent to 'denied' as a placeholder
-	  // Determine actual values based on your own requirements
-
-		const consent = JSON.parse(window.localStorage.getItem("cookie_consent"))
-
-		if(consent) {
-			gtag('consent', 'default', consent)
-		} else {	
-			gtag('consent', 'default', {
-				'ad_storage': 'denied',
-				'ad_user_data': 'denied',
-				'ad_personalization': 'denied',
-				'analytics_storage': 'denied'
-			});
+	<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "WebSite",
+			"name": "Simplesmente Sim",
+			"url": "https://simplesmentesim.com",
+			"inLanguage": "pt-BR",
+			"description": "Receba o Guia da Noiva e conteúdos para organizar seu casamento com mais clareza, do planejamento ao altar.",
+			"publisher": {
+				"@type": "Organization",
+				"name": "Simplesmente Sim",
+				"url": "https://simplesmentesim.com",
+				"logo": "https://simplesmentesim.com/logo-header.svg"
+			}
 		}
 	</script>
 
+	<script>
+		// Define dataLayer and the gtag function.
+		window.dataLayer = window.dataLayer || [];
+		function gtag() {
+			dataLayer.push(arguments);
+		}
+
+		// Set default consent to 'denied' as a placeholder
+		// Determine actual values based on your own requirements
+
+		const consent = JSON.parse(window.localStorage.getItem('cookie_consent'));
+
+		if (consent) {
+			gtag('consent', 'default', consent);
+		} else {
+			gtag('consent', 'default', {
+				ad_storage: 'denied',
+				ad_user_data: 'denied',
+				ad_personalization: 'denied',
+				analytics_storage: 'denied'
+			});
+		}
+	</script>
 </svelte:head>
 
 <ConsentPopup />

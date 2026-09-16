@@ -3,7 +3,5 @@
 // 	"editor.defaultFormatter": "esbenp.prettier-vscode"
 // }
 {
-  "recommendations": [
-    "inlang.vs-code-extension"
-  ]
+	"recommendations": ["inlang.vs-code-extension"]
 }

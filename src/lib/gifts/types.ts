@@ -21,9 +21,17 @@ export type PublicGiftListMeta = {
 	slug: string;
 };
 
+export type PublicGiftSummary = {
+	availableCount: number;
+	purchasedCount: number;
+	reservedCount: number;
+	totalCount: number;
+};
+
 export type PublicGiftList = {
 	gifts: PublicGift[];
 	meta: PublicGiftListMeta;
+	summary: PublicGiftSummary;
 };
 
 export type PublicGiftPurchase = {

@@ -3,6 +3,7 @@
 	import {
 		getPublicGiftList,
 		GiftApiError,
+		giftSummaryFromGifts,
 		giftErrorMessage,
 		purchasePublicGift
 	} from '$lib/gifts/api';
@@ -103,9 +104,13 @@
 				idempotencyKey: idempotencyKey || createIdempotencyKey()
 			});
 			if (giftList) {
+				const gifts = giftList.gifts.map((gift) =>
+					gift.id === updatedGift.id ? updatedGift : gift
+				);
 				giftList = {
 					...giftList,
-					gifts: giftList.gifts.map((gift) => (gift.id === updatedGift.id ? updatedGift : gift))
+					gifts,
+					summary: giftSummaryFromGifts(gifts)
 				};
 			}
 			confirmation = updatedGift;
@@ -205,7 +210,10 @@
 					<p class="eyebrow">Escolha com carinho</p>
 					<h2 id="gift-heading">Nossa lista</h2>
 				</div>
-				<span>{giftList.gifts.filter((gift) => gift.available).length} disponíveis</span>
+				<span
+					>{giftList.summary.availableCount} de {giftList.summary.totalCount}
+					{giftList.summary.availableCount === 1 ? 'disponível' : 'disponíveis'}</span
+				>
 			</div>
 
 			<div class="filters">

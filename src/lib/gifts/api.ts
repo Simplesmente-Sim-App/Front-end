@@ -1,4 +1,4 @@
-import type { PublicGift, PublicGiftList, PublicGiftPurchase } from './types';
+import type { PublicGift, PublicGiftList, PublicGiftPurchase, PublicGiftSummary } from './types';
 
 const API_URL = (import.meta.env.VITE_API_URL ?? 'https://api.simplesmentesim.com').replace(
 	/\/$/,
@@ -11,8 +11,9 @@ type PublicGiftApiResponse = Omit<PublicGift, 'estimatedPrice'> & {
 	estimatedPrice: number;
 };
 
-type PublicGiftListApiResponse = Omit<PublicGiftList, 'gifts'> & {
+type PublicGiftListApiResponse = Omit<PublicGiftList, 'gifts' | 'summary'> & {
 	gifts: PublicGiftApiResponse[];
+	summary?: PublicGiftSummary;
 };
 
 export class GiftApiError extends Error {
@@ -41,6 +42,44 @@ function normalizeGift(gift: PublicGiftApiResponse): PublicGift {
 		available: gift.available === true,
 		purchased: gift.purchased === true
 	};
+}
+
+export function giftSummaryFromGifts(gifts: PublicGift[]): PublicGiftSummary {
+	const availableCount = gifts.filter((gift) => gift.available).length;
+	const purchasedCount = gifts.filter((gift) => gift.purchased).length;
+	return {
+		totalCount: gifts.length,
+		availableCount,
+		reservedCount: Math.max(0, gifts.length - availableCount - purchasedCount),
+		purchasedCount
+	};
+}
+
+function normalizeSummary(
+	summary: PublicGiftSummary | undefined,
+	gifts: PublicGift[]
+): PublicGiftSummary {
+	const derivedSummary = giftSummaryFromGifts(gifts);
+	if (!summary) return derivedSummary;
+
+	const counts = [
+		summary.totalCount,
+		summary.availableCount,
+		summary.reservedCount,
+		summary.purchasedCount
+	];
+	if (
+		counts.some((count) => !Number.isSafeInteger(count) || count < 0) ||
+		summary.availableCount + summary.reservedCount + summary.purchasedCount !==
+			summary.totalCount ||
+		Object.entries(derivedSummary).some(
+			([key, count]) => summary[key as keyof PublicGiftSummary] !== count
+		)
+	) {
+		throw new GiftApiError(502, 'A lista de presentes retornou um resumo inválido.');
+	}
+
+	return summary;
 }
 
 async function request<T>(fetcher: Fetcher, path: string, options: RequestInit = {}) {
@@ -80,9 +119,11 @@ export async function getPublicGiftList(slug: string, fetcher: Fetcher = fetch) 
 		throw new GiftApiError(502, 'A lista de presentes retornou dados incompletos.');
 	}
 
+	const gifts = response.gifts.map(normalizeGift);
 	return {
 		...response,
-		gifts: response.gifts.map(normalizeGift)
+		gifts,
+		summary: normalizeSummary(response.summary, gifts)
 	};
 }
 

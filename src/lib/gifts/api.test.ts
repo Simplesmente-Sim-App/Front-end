@@ -14,6 +14,7 @@ describe('gift API', () => {
 		const fetcher = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
 			jsonResponse({
 				meta: { coupleNames: 'Ana & Ian', slug: 'ana-ian' },
+				summary: { totalCount: 1, availableCount: 1, reservedCount: 0, purchasedCount: 0 },
 				gifts: [
 					{
 						id: 'gift-1',
@@ -29,6 +30,12 @@ describe('gift API', () => {
 		const result = await getPublicGiftList('ana & ian', fetcher as unknown as typeof fetch);
 
 		expect(result.gifts[0]?.estimatedPrice).toBe(259.9);
+		expect(result.summary).toEqual({
+			totalCount: 1,
+			availableCount: 1,
+			reservedCount: 0,
+			purchasedCount: 0
+		});
 		expect(fetcher).toHaveBeenCalledOnce();
 		expect(fetcher.mock.calls[0]?.[0]).toMatch(/\/api\/public\/gift-lists\/ana%20%26%20ian$/);
 	});
@@ -67,6 +74,32 @@ describe('gift API', () => {
 				})
 			})
 		);
+	});
+
+	it('derives the summary while an older backend is still being replaced', async () => {
+		const fetcher = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
+			jsonResponse({
+				meta: { coupleNames: 'Ana & Ian', slug: 'ana-ian' },
+				gifts: [
+					{
+						id: 'gift-1',
+						name: 'Jogo de jantar',
+						estimatedPrice: 25990,
+						available: false,
+						purchased: false
+					}
+				]
+			})
+		);
+
+		const result = await getPublicGiftList('ana-ian', fetcher as unknown as typeof fetch);
+
+		expect(result.summary).toEqual({
+			totalCount: 1,
+			availableCount: 0,
+			reservedCount: 1,
+			purchasedCount: 0
+		});
 	});
 
 	it('turns backend failures into typed, friendly errors', async () => {

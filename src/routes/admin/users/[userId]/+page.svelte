@@ -21,7 +21,7 @@
 
 	onMount(async () => {
 		try {
-			const session = await restoreAdminSession(true);
+			const session = await restoreAdminSession();
 			if (!session) throw new ApiError(401, 'Sessão administrativa expirada.');
 			if (session.role !== 'ADMIN') throw new ApiError(403, 'Acesso negado');
 			user = session;

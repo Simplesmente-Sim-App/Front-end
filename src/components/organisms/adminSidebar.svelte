@@ -1,17 +1,12 @@
 <script lang="ts">
 	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
-	import Store from '@lucide/svelte/icons/store';
-	import Bell from '@lucide/svelte/icons/bell';
-	import Activity from '@lucide/svelte/icons/activity';
-	import Settings from '@lucide/svelte/icons/settings';
+	import Users from '@lucide/svelte/icons/users';
 	import LogOut from '@lucide/svelte/icons/log-out';
 	export let active = 'overview';
 	export let onLogout: () => void;
 	const items = [
 		{ id: 'overview', label: 'Visão geral', href: '/admin', icon: LayoutDashboard },
-		{ id: 'suppliers', label: 'Fornecedores', href: '/admin/suppliers', icon: Store },
-		{ id: 'notifications', label: 'Notificações', href: '/admin/notifications', icon: Bell },
-		{ id: 'operations', label: 'Operações', href: '/admin/operations', icon: Activity }
+		{ id: 'users', label: 'Usuários', href: '/admin/users', icon: Users }
 	];
 </script>
 
@@ -21,13 +16,15 @@
 	<p class="section-label">Workspace</p>
 	<nav aria-label="Navegação administrativa">
 		{#each items as item}
-			<a class:active={active === item.id} href={item.href}
+			<a
+				class:active={active === item.id}
+				aria-current={active === item.id ? 'page' : undefined}
+				href={item.href}
 				><svelte:component this={item.icon} size={17} aria-hidden="true" />{item.label}</a
 			>
 		{/each}
 	</nav>
 	<div class="sidebar-bottom">
-		<a href="/admin/settings"><Settings size={17} aria-hidden="true" />Configurações</a>
 		<button type="button" onclick={onLogout}><LogOut size={17} aria-hidden="true" />Sair</button>
 	</div>
 </aside>
@@ -71,7 +68,6 @@
 		gap: 0.25rem;
 	}
 	nav a,
-	.sidebar-bottom a,
 	.sidebar-bottom button {
 		display: flex;
 		align-items: center;
@@ -88,7 +84,6 @@
 		text-align: left;
 	}
 	nav a:hover,
-	.sidebar-bottom a:hover,
 	.sidebar-bottom button:hover,
 	nav a.active {
 		color: #84000b;
@@ -110,14 +105,11 @@
 		}
 		.brand span,
 		.section-label,
-		nav a:not(.active)::after,
 		nav a,
-		.sidebar-bottom a,
 		.sidebar-bottom button {
 			font-size: 0;
 		}
 		nav a,
-		.sidebar-bottom a,
 		.sidebar-bottom button {
 			justify-content: center;
 		}

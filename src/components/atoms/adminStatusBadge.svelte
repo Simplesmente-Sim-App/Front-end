@@ -2,6 +2,11 @@
 	export let status: string;
 	const labels: Record<string, string> = {
 		ACTIVE: 'Ativo',
+		BLOCKED: 'Bloqueado',
+		DEACTIVATED: 'Desativado',
+		PAST_DUE: 'Em atraso',
+		CANCELED: 'Cancelada',
+		NO_SUBSCRIPTION: 'Sem assinatura',
 		INACTIVE: 'Inativo',
 		ARCHIVED: 'Arquivado',
 		OK: 'Normal',
@@ -9,7 +14,7 @@
 	};
 </script>
 
-<span class={`status status--${status.toLowerCase()}`}
+	<span class={`status status--${status.toLowerCase()}`} aria-label={labels[status] ?? status}
 	><span class="dot"></span>{labels[status] ?? status}</span
 >
 
@@ -38,10 +43,15 @@
 		background: #e4f1e8;
 	}
 	.status--inactive,
-	.status--error {
+	.status--error,
+	.status--past_due {
 		color: #9a5b29;
 		background: #fff0dc;
 	}
+	.status--blocked,
+	.status--deactivated,
+	.status--canceled,
+	.status--no_subscription { color: #8e3b32; background: #f9e8eb; }
 	.status--archived {
 		color: #747d82;
 		background: #edf0f1;

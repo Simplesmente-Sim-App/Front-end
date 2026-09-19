@@ -5,8 +5,13 @@
 	import AdminStatusBadge from '../../components/atoms/adminStatusBadge.svelte';
 	import { adminApi, ApiError } from '$lib/admin/api';
 	import type { AuthResponse, OperationOverview } from '$lib/admin/types';
+	import {
+		loginAdmin,
+		logoutAdmin,
+		restoreAdminSession,
+		withAdminSession
+	} from '$lib/admin/session';
 
-	let token = '';
 	let user: AuthResponse | null = null;
 	let email = '';
 	let password = '';
@@ -18,7 +23,9 @@
 	let loginLoading = false;
 	let error = '';
 	let refreshCycle = 0;
-	let refreshingSession = false;
+	let hasLoaded = false;
+	let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+	let lastUpdatedAt: Date | null = null;
 
 	function errorMessage(cause: unknown, context: 'login' | 'dashboard'): string {
 		if (cause instanceof ApiError) {
@@ -39,14 +46,14 @@
 	onMount(() => {
 		const initialize = async () => {
 			try {
-				const response = await adminApi.refresh();
+				const response = await restoreAdminSession();
+				if (!response) return;
 				if (response.role === 'ADMIN') {
-					token = response.token;
 					user = response;
 					await loadDashboard();
 				}
-			} catch {
-				/* login required */
+			} catch (cause) {
+				error = errorMessage(cause, 'dashboard');
 			} finally {
 				loading = false;
 			}
@@ -59,35 +66,31 @@
 	}
 
 	async function loadDashboard() {
-		loading = true;
+		loading = !hasLoaded;
 		error = '';
 		try {
-			[overview, userSummary] = await Promise.all([
-				adminApi.overview(token),
-				adminApi.userSummary(token)
-			]);
-			users = (await adminApi.users(token)).content;
+			[overview, userSummary] = await withAdminSession((sessionToken) =>
+				Promise.all([adminApi.overview(sessionToken), adminApi.userSummary(sessionToken)])
+			);
+			users = (await withAdminSession((sessionToken) => adminApi.users(sessionToken))).content;
+			lastUpdatedAt = new Date();
+			scheduleRefresh();
 		} catch (cause) {
-			if (cause instanceof ApiError && cause.status === 401 && !refreshingSession) {
-				refreshingSession = true;
-				try {
-					const response = await adminApi.refresh();
-					token = response.token;
-					user = response;
-					return await loadDashboard();
-				} catch {
-					/* session is no longer valid */
-				} finally {
-					refreshingSession = false;
-				}
-			}
 			error = errorMessage(cause, 'dashboard');
 			if (cause instanceof ApiError && (cause.status === 401 || cause.status === 403))
 				await logout();
 		} finally {
+			hasLoaded = true;
 			loading = false;
 			refreshCycle += 1;
 		}
+	}
+
+	function scheduleRefresh() {
+		if (refreshTimer) clearTimeout(refreshTimer);
+		refreshTimer = setTimeout(() => {
+			if (!loading) void refreshData();
+		}, 20000);
 	}
 
 	async function login() {
@@ -99,10 +102,9 @@
 		}
 		loginLoading = true;
 		try {
-			const response = await adminApi.login(email.trim(), password, rememberMe);
+			const response = await loginAdmin(email.trim(), password, rememberMe);
 			if (response.role !== 'ADMIN')
 				throw new Error('Esta conta não possui acesso administrativo.');
-			token = response.token;
 			user = response;
 			password = '';
 			await loadDashboard();
@@ -111,7 +113,6 @@
 				cause instanceof Error && !(cause instanceof ApiError)
 					? cause.message
 					: errorMessage(cause, 'login');
-			token = '';
 			user = null;
 		} finally {
 			loginLoading = false;
@@ -119,8 +120,8 @@
 	}
 
 	async function logout() {
-		await adminApi.logout().catch(() => undefined);
-		token = '';
+		await logoutAdmin();
+		if (refreshTimer) clearTimeout(refreshTimer);
 		user = null;
 		overview = null;
 		userSummary = null;
@@ -135,7 +136,11 @@
 	/></svelte:head
 >
 
-{#if !token}
+{#if loading && !user}
+	<main class="loading-screen" role="status" aria-live="polite">
+		Verificando sessão administrativa...
+	</main>
+{:else if !user}
 	<main class="login-page">
 		<section class="login-card" aria-labelledby="login-title">
 			<img src="/logo-favicon.svg" alt="" /><span class="eyebrow">Área restrita</span>
@@ -192,7 +197,6 @@
 								class="refresh-progress"
 								role="progressbar"
 								aria-label="Próxima atualização automática"
-								onanimationend={refreshData}
 							></span>{/key}{/if}</button
 				>
 			</div>
@@ -205,10 +209,9 @@
 					value={userSummary?.totalUsers ?? 0}
 					detail="Contados sem duplicação"
 				/><AdminMetricCard
-					label="Sem plano"
-					value={userSummary?.usersWithoutPlan ?? 0}
-					detail="Precisam de acompanhamento"
-					tone={userSummary?.usersWithoutPlan ? 'warning' : 'default'}
+					label="Assinaturas"
+					value="—"
+					detail="Consultadas por casamento"
 				/><AdminMetricCard
 					label="Eventos totais"
 					value={overview?.totalEvents ?? 0}
@@ -227,13 +230,10 @@
 							<p>Distribuição dos usuários cadastrados.</p>
 						</div>
 					</div>
-					{#if userSummary?.byPlan.length}<div class="plan-list">
-							{#each userSummary.byPlan as plan}<div class="plan-row">
-									<span>{plan.planName}<small>{plan.planCode}</small></span><strong
-										>{plan.userCount}</strong
-									>
-								</div>{/each}
-						</div>{:else}<div class="empty">Nenhum plano encontrado.</div>{/if}
+					<div class="empty">
+						Planos são vinculados a casamentos. Consulte as assinaturas no contexto de cada
+						casamento.
+					</div>
 				</section>
 				<section class="panel">
 					<div class="panel-heading">
@@ -248,14 +248,12 @@
 								<thead><tr><th>Usuário</th><th>Plano</th><th>Status</th></tr></thead><tbody
 									>{#each users as adminUser}<tr
 											><td
-												><strong>{adminUser.name || 'Sem nome'}</strong><small
-													>{adminUser.email}</small
+												><a class="user-link" href={`/admin/users/${adminUser.id}`}
+													><strong>{adminUser.name || 'Sem nome'}</strong><small
+														>{adminUser.email}</small
+													></a
 												></td
-											><td>{adminUser.planName ?? 'Sem plano'}</td><td
-												><AdminStatusBadge
-													status={adminUser.subscriptionStatus ?? 'INACTIVE'}
-												/></td
-											></tr
+											><td><AdminStatusBadge status={adminUser.status} /></td></tr
 										>{/each}</tbody
 								>
 							</table>
@@ -418,28 +416,6 @@
 		font-size: 0.78rem;
 		font-weight: 700;
 		text-decoration: none;
-	}
-	.plan-list {
-		display: grid;
-		gap: 0.25rem;
-	}
-	.plan-row {
-		display: flex;
-		justify-content: space-between;
-		padding: 0.8rem 0;
-		border-bottom: 1px solid #eef0ee;
-		color: #35413d;
-		font-size: 0.84rem;
-	}
-	.plan-row small {
-		display: block;
-		margin-top: 0.25rem;
-		color: #9aa19f;
-		font-size: 0.7rem;
-	}
-	.plan-row strong {
-		color: #84000b;
-		font-size: 1.1rem;
 	}
 	.table-wrap {
 		overflow-x: auto;

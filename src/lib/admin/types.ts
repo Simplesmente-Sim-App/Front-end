@@ -67,16 +67,23 @@ export type AdminUser = {
 	name: string;
 	email: string;
 	role: AdminRole;
+	status: 'ACTIVE' | 'BLOCKED' | 'DEACTIVATED';
 	emailVerified: boolean;
-	planCode: string | null;
-	planName: string | null;
-	subscriptionStatus: 'ACTIVE' | 'PAST_DUE' | 'CANCELED' | null;
 	createdAt: string;
 };
 
-export type AdminPlanSummary = { planCode: string; planName: string; userCount: number };
 export type AdminUserSummary = {
 	totalUsers: number;
-	usersWithoutPlan: number;
-	byPlan: AdminPlanSummary[];
+	activeUsers: number;
+	blockedUsers: number;
+	deactivatedUsers: number;
+};
+
+export type AdminUserDetails = AdminUser & {
+	updatedAt: string;
+	ownedWeddings: number;
+	activeMemberWeddings: number;
+	events: number;
+	guests: number;
+	lastAccessAt: string | null;
 };

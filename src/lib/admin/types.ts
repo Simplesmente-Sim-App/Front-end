@@ -6,7 +6,6 @@ export type AuthResponse = {
 	email: string;
 	name: string;
 	role: AdminRole;
-	status: 'ACTIVE' | 'BLOCKED' | 'DEACTIVATED';
 	emailVerified: boolean;
 };
 
@@ -68,6 +67,7 @@ export type AdminUser = {
 	name: string;
 	email: string;
 	role: AdminRole;
+	status: 'ACTIVE' | 'BLOCKED' | 'DEACTIVATED';
 	emailVerified: boolean;
 	planCode: string | null;
 	planName: string | null;

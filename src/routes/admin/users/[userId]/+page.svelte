@@ -71,7 +71,11 @@
 	/></svelte:head
 >
 
-{#if user}<AdminShell userName={user.name} active="users" onLogout={logout}>
+{#if loading}<main class="state">Validando sessão administrativa...</main>{:else if user}<AdminShell
+		userName={user.name}
+		active="users"
+		onLogout={logout}
+	>
 		<a class="back-link" href="/admin">← Voltar para visão geral</a>
 		{#if loading}<div class="state">Carregando usuário...</div>{:else if error}<div
 				class="state error"

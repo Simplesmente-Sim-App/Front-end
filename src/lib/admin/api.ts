@@ -79,6 +79,34 @@ export const adminApi = {
 	},
 	userDetails: (token: string, userId: string) =>
 		request<import('./types').AdminUserDetails>(`/api/admin/users/${userId}`, {}, token),
+	updateUserProfile: (token: string, userId: string, body: { name: string; email: string }) =>
+		request<import('./types').AdminUserDetails>(
+			`/api/admin/users/${userId}/profile`,
+			{ method: 'PATCH', body: JSON.stringify(body) },
+			token
+		),
+	updateUserRole: (token: string, userId: string, role: 'USER' | 'ADMIN') =>
+		request<import('./types').AdminUserDetails>(
+			`/api/admin/users/${userId}/role`,
+			{ method: 'PATCH', body: JSON.stringify({ role }) },
+			token
+		),
+	updateUserPlan: (
+		token: string,
+		userId: string,
+		body: { weddingId: string; planCode: string | null }
+	) =>
+		request<import('./types').AdminUserDetails>(
+			`/api/admin/users/${userId}/plan`,
+			{ method: 'PATCH', body: JSON.stringify(body) },
+			token
+		),
+	updateUserStatus: (token: string, userId: string, status: 'ACTIVE' | 'BLOCKED' | 'DEACTIVATED') =>
+		request<import('./types').AdminUserDetails>(
+			`/api/admin/users/${userId}/status`,
+			{ method: 'PATCH', body: JSON.stringify({ status }) },
+			token
+		),
 	suppliers: (
 		token: string,
 		params: {

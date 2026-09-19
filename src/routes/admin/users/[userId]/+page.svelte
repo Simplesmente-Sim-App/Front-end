@@ -10,6 +10,13 @@
 	let details: AdminUserDetails | null = null;
 	let loading = true;
 	let error = '';
+	let saving = '';
+	let profileName = '';
+	let profileEmail = '';
+	let selectedRole: 'USER' | 'ADMIN' = 'USER';
+	let selectedStatus: 'ACTIVE' | 'BLOCKED' | 'DEACTIVATED' = 'ACTIVE';
+	let weddingId = '';
+	let planCode = '';
 
 	onMount(async () => {
 		try {
@@ -19,6 +26,11 @@
 			const userId = page.params.userId;
 			if (!userId) throw new ApiError(400, 'Usuário inválido');
 			details = await adminApi.userDetails(session.token, userId);
+			profileName = details.name;
+			profileEmail = details.email;
+			selectedRole = details.role;
+			selectedStatus = details.status;
+			planCode = details.planCode ?? '';
 		} catch (cause) {
 			error =
 				cause instanceof ApiError && cause.status === 404
@@ -32,6 +44,23 @@
 	async function logout() {
 		await adminApi.logout().catch(() => undefined);
 		user = null;
+	}
+
+	async function update(kind: string, action: () => Promise<AdminUserDetails>) {
+		if (!user || saving) return;
+		saving = kind;
+		error = '';
+		try {
+			details = await action();
+		} catch (cause) {
+			error = cause instanceof ApiError ? cause.message : 'Não foi possível salvar a alteração.';
+		} finally {
+			saving = '';
+		}
+	}
+
+	function userId() {
+		return page.params.userId ?? '';
 	}
 </script>
 
@@ -76,6 +105,88 @@
 					<span>E-mail verificado</span><strong>{details.emailVerified ? 'Sim' : 'Não'}</strong>
 				</div>
 			</section>
+			<section class="edit-grid" aria-label="Editar usuário">
+				<form
+					class="card form-card"
+					onsubmit={(event) => {
+						event.preventDefault();
+						update('profile', () =>
+							adminApi.updateUserProfile(user!.token, userId(), {
+								name: profileName,
+								email: profileEmail
+							})
+						);
+					}}
+				>
+					<h2>Perfil</h2>
+					<label>Nome<input bind:value={profileName} required /></label><label
+						>E-mail<input type="email" bind:value={profileEmail} required /></label
+					><button disabled={Boolean(saving)}
+						>{saving === 'profile' ? 'Salvando...' : 'Salvar perfil'}</button
+					>
+				</form>
+				<form
+					class="card form-card"
+					onsubmit={(event) => {
+						event.preventDefault();
+						update('role', () => adminApi.updateUserRole(user!.token, userId(), selectedRole));
+					}}
+				>
+					<h2>Permissão</h2>
+					<label
+						>Role<select bind:value={selectedRole}
+							><option value="USER">USER</option><option value="ADMIN">ADMIN</option></select
+						></label
+					><button disabled={Boolean(saving)}
+						>{saving === 'role' ? 'Salvando...' : 'Salvar role'}</button
+					>
+				</form>
+				<form
+					class="card form-card"
+					onsubmit={(event) => {
+						event.preventDefault();
+						update('status', () =>
+							adminApi.updateUserStatus(user!.token, userId(), selectedStatus)
+						);
+					}}
+				>
+					<h2>Status</h2>
+					<label
+						>Status<select bind:value={selectedStatus}
+							><option value="ACTIVE">Ativo</option><option value="BLOCKED">Bloqueado</option
+							><option value="DEACTIVATED">Desativado</option></select
+						></label
+					><button disabled={Boolean(saving)}
+						>{saving === 'status' ? 'Salvando...' : 'Salvar status'}</button
+					>
+				</form>
+				<form
+					class="card form-card"
+					onsubmit={(event) => {
+						event.preventDefault();
+						if (!weddingId) {
+							error = 'Informe o ID do casamento para alterar o plano.';
+							return;
+						}
+						update('plan', () =>
+							adminApi.updateUserPlan(user!.token, userId(), {
+								weddingId,
+								planCode: planCode || null
+							})
+						);
+					}}
+				>
+					<h2>Plano</h2>
+					<label>ID do casamento<input bind:value={weddingId} required /></label><label
+						>Código do plano<input
+							bind:value={planCode}
+							placeholder="Deixe vazio para remover"
+						/></label
+					><button disabled={Boolean(saving)}
+						>{saving === 'plan' ? 'Salvando...' : 'Salvar plano'}</button
+					>
+				</form>
+			</section>
 		{:else}<div class="state">Nenhum dado disponível.</div>{/if}
 	</AdminShell>{:else}<main class="state error" role="alert">
 		Sessão administrativa não encontrada.
@@ -118,6 +229,51 @@
 		grid-template-columns: repeat(3, 1fr);
 		gap: 1rem;
 	}
+	.edit-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 1rem;
+		margin-top: 1rem;
+	}
+	.form-card {
+		display: grid;
+		gap: 0.7rem;
+	}
+	.form-card h2 {
+		color: #26322f;
+		font-size: 1rem;
+	}
+	.form-card label {
+		display: grid;
+		gap: 0.3rem;
+		color: #65706c;
+		font-size: 0.75rem;
+		font-weight: 600;
+	}
+	.form-card input,
+	.form-card select {
+		min-height: 40px;
+		padding: 0 0.65rem;
+		border: 1px solid #dfe4e1;
+		border-radius: 7px;
+		color: #26322f;
+		background: #fbfcfb;
+		font: inherit;
+	}
+	.form-card button {
+		min-height: 40px;
+		border: 0;
+		border-radius: 7px;
+		color: #fff;
+		background: #84000b;
+		font: inherit;
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.form-card button:disabled {
+		opacity: 0.6;
+		cursor: wait;
+	}
 	.card {
 		min-height: 110px;
 		padding: 1.2rem;
@@ -146,7 +302,8 @@
 		color: #8e3b32;
 	}
 	@media (max-width: 700px) {
-		.grid {
+		.grid,
+		.edit-grid {
 			grid-template-columns: repeat(2, 1fr);
 		}
 		.heading {

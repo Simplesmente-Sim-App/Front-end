@@ -6,6 +6,7 @@ export type AuthResponse = {
 	email: string;
 	name: string;
 	role: AdminRole;
+	status: 'ACTIVE' | 'BLOCKED' | 'DEACTIVATED';
 	emailVerified: boolean;
 };
 

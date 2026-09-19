@@ -4,12 +4,17 @@
 	import AdminShell from '../../../../components/templates/adminShell.svelte';
 	import AdminStatusBadge from '../../../../components/atoms/adminStatusBadge.svelte';
 	import { adminApi, ApiError } from '$lib/admin/api';
-	import { logoutAdmin, restoreAdminSession, withAdminSession } from '$lib/admin/session';
+	import {
+		getAdminSession,
+		logoutAdmin,
+		restoreAdminSession,
+		withAdminSession
+	} from '$lib/admin/session';
 	import type { AdminUserDetails, AuthResponse } from '$lib/admin/types';
 
-	let user: AuthResponse | null = null;
+	let user: AuthResponse | null = getAdminSession();
 	let details: AdminUserDetails | null = null;
-	let loading = true;
+	let loading = !getAdminSession();
 	let error = '';
 	let saving = '';
 	let profileName = '';

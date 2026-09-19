@@ -46,17 +46,58 @@ async function request<T>(path: string, options: RequestInit = {}, token?: strin
 	return response.json() as Promise<T>;
 }
 
+function objectResponse(value: unknown, label: string): Record<string, unknown> {
+	if (!value || typeof value !== 'object' || Array.isArray(value))
+		throw new ApiError(502, `Resposta inválida recebida em ${label}.`);
+	return value as Record<string, unknown>;
+}
+
+function validateAuth(value: unknown): AuthResponse {
+	const body = objectResponse(value, 'autenticação');
+	if (
+		typeof body.token !== 'string' ||
+		typeof body.userId !== 'string' ||
+		typeof body.role !== 'string'
+	)
+		throw new ApiError(502, 'A resposta de autenticação está incompleta.');
+	return value as AuthResponse;
+}
+
+function validateSummary(value: unknown): AdminUserSummary {
+	const body = objectResponse(value, 'resumo de usuários');
+	if (
+		!['totalUsers', 'activeUsers', 'blockedUsers', 'deactivatedUsers'].every(
+			(key) => typeof body[key] === 'number'
+		)
+	)
+		throw new ApiError(502, 'O resumo de usuários não corresponde ao contrato atual.');
+	return value as AdminUserSummary;
+}
+
+function validateOverview(value: unknown): OperationOverview {
+	const body = objectResponse(value, 'visão geral');
+	if (
+		typeof body.totalEvents !== 'number' ||
+		typeof body.last24HoursEvents !== 'number' ||
+		typeof body.last24HoursFailures !== 'number'
+	)
+		throw new ApiError(502, 'A resposta da visão geral está incompleta.');
+	return value as OperationOverview;
+}
+
 export const adminApi = {
 	login: (email: string, password: string, rememberMe: boolean) =>
-		request<AuthResponse>('/api/auth/login', {
+		request<unknown>('/api/auth/login', {
 			method: 'POST',
 			body: JSON.stringify({ email, password, rememberMe })
-		}),
-	refresh: () => request<AuthResponse>('/api/auth/refresh', { method: 'POST' }),
+		}).then(validateAuth),
+	refresh: () => request<unknown>('/api/auth/refresh', { method: 'POST' }).then(validateAuth),
 	logout: () => request<void>('/api/auth/logout', { method: 'POST' }),
 	me: (token: string) => request<UserProfile>('/api/auth/me', {}, token),
-	overview: (token: string) => request<OperationOverview>('/api/operations/overview', {}, token),
-	userSummary: (token: string) => request<AdminUserSummary>('/api/admin/users/summary', {}, token),
+	overview: (token: string) =>
+		request<unknown>('/api/operations/overview', {}, token).then(validateOverview),
+	userSummary: (token: string) =>
+		request<unknown>('/api/admin/users/summary', {}, token).then(validateSummary),
 	users: (
 		token: string,
 		params: {

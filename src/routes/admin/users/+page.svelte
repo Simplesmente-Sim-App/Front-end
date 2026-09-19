@@ -77,7 +77,6 @@
 		const params = new URLSearchParams();
 		if (query.trim()) params.set('query', query.trim());
 		if (role) params.set('role', role);
-		if (planCode.trim()) params.set('planCode', planCode.trim());
 		await goto(`/admin/users?${params}`);
 	}
 
@@ -119,7 +118,7 @@
 					value="ADMIN">Administrador</option
 				></select
 			><input
-				aria-label="Filtrar por plano"
+				aria-label="Filtro indisponível: assinatura é por casamento"
 				placeholder="Código do plano"
 				bind:value={planCode}
 			/><button>Filtrar</button>
@@ -135,16 +134,14 @@
 				Nenhum usuário encontrado.
 			</div>{:else}<div class="table-wrap">
 				<table>
-					<thead><tr><th>Usuário</th><th>Conta</th><th>Plano</th><th>Assinatura</th></tr></thead
-					><tbody
+					<thead><tr><th>Usuário</th><th>Conta</th><th>Assinaturas</th></tr></thead><tbody
 						>{#each users as item}<tr
 								><td
 									><a href={`/admin/users/${item.id}`}
 										><strong>{item.name || 'Sem nome'}</strong><small>{item.email}</small></a
 									></td
 								><td><AdminStatusBadge status={item.status} /></td><td
-									>{item.planName ?? 'Sem plano'}</td
-								><td><AdminStatusBadge status={item.subscriptionStatus ?? 'NO_SUBSCRIPTION'} /></td
+									>Consulte os casamentos e assinaturas no detalhe</td
 								></tr
 							>{/each}</tbody
 					>

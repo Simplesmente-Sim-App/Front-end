@@ -37,7 +37,6 @@
 			profileEmail = details.email;
 			selectedRole = details.role;
 			selectedStatus = details.status;
-			planCode = details.planCode ?? '';
 		} catch (cause) {
 			error =
 				cause instanceof ApiError && cause.status === 404
@@ -96,12 +95,12 @@
 					<h1>{details.name || 'Sem nome'}</h1>
 					<p>{details.email}</p>
 				</div>
-				<AdminStatusBadge status={details.subscriptionStatus ?? 'INACTIVE'} />
+				<AdminStatusBadge status={details.status} />
 			</div>
 			<section class="grid" aria-label="Resumo do usuário">
 				<div class="card">
-					<span>Plano atual</span><strong>{details.planName ?? 'Sem plano'}</strong><small
-						>{details.planCode ?? 'Nenhuma assinatura vinculada'}</small
+					<span>Assinaturas</span><strong>Por casamento</strong><small
+						>O plano pertence a cada casamento, não à conta.</small
 					>
 				</div>
 				<div class="card">
@@ -185,7 +184,12 @@
 						);
 					}}
 				>
-					<h2>Plano</h2>
+					<h2>Assinatura por casamento</h2>
+					<p class="form-note">
+						A assinatura pertence a um casamento. A API atual ainda não fornece a lista de
+						casamentos e suas assinaturas para esta conta; informe o casamento somente quando essa
+						identificação vier da API.
+					</p>
 					<label>ID do casamento<input bind:value={weddingId} required /></label><label
 						>Código do plano<input
 							bind:value={planCode}

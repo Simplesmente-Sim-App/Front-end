@@ -5,6 +5,12 @@
 	import AdminStatusBadge from '../../components/atoms/adminStatusBadge.svelte';
 	import { adminApi, ApiError } from '$lib/admin/api';
 	import type { AuthResponse, OperationOverview } from '$lib/admin/types';
+	import {
+		loginAdmin,
+		logoutAdmin,
+		restoreAdminSession,
+		withAdminSession
+	} from '$lib/admin/session';
 
 	let token = '';
 	let user: AuthResponse | null = null;
@@ -19,6 +25,8 @@
 	let error = '';
 	let refreshCycle = 0;
 	let refreshingSession = false;
+	let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+	let lastUpdatedAt: Date | null = null;
 
 	function errorMessage(cause: unknown, context: 'login' | 'dashboard'): string {
 		if (cause instanceof ApiError) {
@@ -39,7 +47,8 @@
 	onMount(() => {
 		const initialize = async () => {
 			try {
-				const response = await adminApi.refresh();
+				const response = await restoreAdminSession();
+				if (!response) return;
 				if (response.role === 'ADMIN') {
 					token = response.token;
 					user = response;
@@ -62,11 +71,12 @@
 		loading = true;
 		error = '';
 		try {
-			[overview, userSummary] = await Promise.all([
-				adminApi.overview(token),
-				adminApi.userSummary(token)
-			]);
-			users = (await adminApi.users(token)).content;
+			[overview, userSummary] = await withAdminSession((sessionToken) =>
+				Promise.all([adminApi.overview(sessionToken), adminApi.userSummary(sessionToken)])
+			);
+			users = (await withAdminSession((sessionToken) => adminApi.users(sessionToken))).content;
+			lastUpdatedAt = new Date();
+			scheduleRefresh();
 		} catch (cause) {
 			if (cause instanceof ApiError && cause.status === 401 && !refreshingSession) {
 				refreshingSession = true;
@@ -90,6 +100,13 @@
 		}
 	}
 
+	function scheduleRefresh() {
+		if (refreshTimer) clearTimeout(refreshTimer);
+		refreshTimer = setTimeout(() => {
+			if (!loading) void refreshData();
+		}, 20000);
+	}
+
 	async function login() {
 		if (loginLoading) return;
 		error = '';
@@ -99,7 +116,7 @@
 		}
 		loginLoading = true;
 		try {
-			const response = await adminApi.login(email.trim(), password, rememberMe);
+			const response = await loginAdmin(email.trim(), password, rememberMe);
 			if (response.role !== 'ADMIN')
 				throw new Error('Esta conta não possui acesso administrativo.');
 			token = response.token;
@@ -119,7 +136,8 @@
 	}
 
 	async function logout() {
-		await adminApi.logout().catch(() => undefined);
+		await logoutAdmin();
+		if (refreshTimer) clearTimeout(refreshTimer);
 		token = '';
 		user = null;
 		overview = null;
@@ -192,7 +210,6 @@
 								class="refresh-progress"
 								role="progressbar"
 								aria-label="Próxima atualização automática"
-								onanimationend={refreshData}
 							></span>{/key}{/if}</button
 				>
 			</div>

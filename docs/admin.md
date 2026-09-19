@@ -1,27 +1,27 @@
 # Painel administrativo
 
-O painel em `/admin` usa a estética SaaS neutra definida para a área administrativa e segue Atomic Design.
+O painel administrativo está disponível em `/admin`. A listagem fica em `/admin/users` e o detalhe em `/admin/users/:userId`.
 
-## Integração com a API
+## Sessão e API
 
-Os contratos usados nesta primeira versão vêm de `back-end/docs/openapi-frontend.json`:
+O cliente usa cookies de sessão (`credentials: include`) e não grava tokens em `localStorage`. `src/lib/admin/session.ts` centraliza restauração, renovação compartilhada após `401`, logout confirmado e rejeição de contas que não possuem papel `ADMIN`.
 
-- `POST /api/auth/login` para obter o JWT;
-- `GET /api/operations/overview` para as métricas da operação;
-- `GET /api/admin/users/summary` para a distribuição de usuários por plano;
-- `GET /api/admin/users` para a listagem inicial de usuários com filtros e paginação;
-- `GET /api/auth/me` está disponível no cliente para a próxima etapa de validação da sessão.
+Rotas consumidas pelo frontend:
 
-O cliente HTTP está em `src/lib/admin/api.ts`, e os tipos correspondentes estão em `src/lib/admin/types.ts`. Os componentes de interface não fazem chamadas diretamente: a rota coordena carregamento, sessão e estados.
+- `POST /api/auth/login`, `POST /api/auth/refresh` e `POST /api/auth/logout`;
+- `GET /api/operations/overview`;
+- `GET /api/admin/users/summary` e `GET /api/admin/users`;
+- `GET /api/admin/users/{userId}`;
+- `PATCH /api/admin/users/{userId}/profile`, `/role`, `/plan` e `/status`.
 
-## Atomic Design
+A listagem preserva busca, role, plano e página na URL. A tela de detalhe mantém os valores editados em caso de erro e mostra o resultado junto à operação.
 
-- Atoms: `adminStatusBadge`;
-- Molecules: `adminMetricCard`;
-- Organisms: `adminSidebar`;
-- Template: `adminShell`;
-- Route: composição da dashboard e do login.
+## Domínios
 
-## Segurança pendente
+Status da conta (`ACTIVE`, `BLOCKED`, `DEACTIVATED`) e status da assinatura (`ACTIVE`, `PAST_DUE`, `CANCELED` ou ausência) são apresentados separadamente. Ausência de assinatura não significa conta inativa.
 
-A API exige JWT e papel `ADMIN`. O token é mantido em `localStorage` apenas para viabilizar esta primeira integração no frontend. Antes de produção, substituir por cookie seguro HttpOnly ou pelo mecanismo de sessão definido pelo backend, além de validar `/api/auth/me` antes de renderizar dados protegidos.
+## Dependências do backend
+
+O frontend não inventa contratos para listar casamentos do usuário, selecionar a assinatura por casamento, confirmar novo e-mail, alterar pagador, revogar privilégios, proteger o último administrador ou aplicar ações de segurança no servidor. Essas garantias dependem dos endpoints e regras do backend.
+
+Falhas de logout não são comunicadas como logout confirmado. A interface não executa operações administrativas reais para validação.

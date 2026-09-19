@@ -4,6 +4,7 @@
 	import AdminShell from '../../../../components/templates/adminShell.svelte';
 	import AdminStatusBadge from '../../../../components/atoms/adminStatusBadge.svelte';
 	import { adminApi, ApiError } from '$lib/admin/api';
+	import { logoutAdmin, restoreAdminSession, withAdminSession } from '$lib/admin/session';
 	import type { AdminUserDetails, AuthResponse } from '$lib/admin/types';
 
 	let user: AuthResponse | null = null;
@@ -20,12 +21,13 @@
 
 	onMount(async () => {
 		try {
-			const session = await adminApi.refresh();
+			const session = await restoreAdminSession(true);
+			if (!session) throw new ApiError(401, 'Sessão administrativa expirada.');
 			if (session.role !== 'ADMIN') throw new ApiError(403, 'Acesso negado');
 			user = session;
 			const userId = page.params.userId;
 			if (!userId) throw new ApiError(400, 'Usuário inválido');
-			details = await adminApi.userDetails(session.token, userId);
+			details = await withAdminSession((token) => adminApi.userDetails(token, userId));
 			profileName = details.name;
 			profileEmail = details.email;
 			selectedRole = details.role;
@@ -42,16 +44,16 @@
 	});
 
 	async function logout() {
-		await adminApi.logout().catch(() => undefined);
+		await logoutAdmin();
 		user = null;
 	}
 
-	async function update(kind: string, action: () => Promise<AdminUserDetails>) {
+	async function update(kind: string, action: (token: string) => Promise<AdminUserDetails>) {
 		if (!user || saving) return;
 		saving = kind;
 		error = '';
 		try {
-			details = await action();
+			details = await withAdminSession(action);
 		} catch (cause) {
 			error = cause instanceof ApiError ? cause.message : 'Não foi possível salvar a alteração.';
 		} finally {
@@ -114,8 +116,8 @@
 					class="card form-card"
 					onsubmit={(event) => {
 						event.preventDefault();
-						update('profile', () =>
-							adminApi.updateUserProfile(user!.token, userId(), {
+						update('profile', (token) =>
+							adminApi.updateUserProfile(token, userId(), {
 								name: profileName,
 								email: profileEmail
 							})
@@ -133,7 +135,7 @@
 					class="card form-card"
 					onsubmit={(event) => {
 						event.preventDefault();
-						update('role', () => adminApi.updateUserRole(user!.token, userId(), selectedRole));
+						update('role', (token) => adminApi.updateUserRole(token, userId(), selectedRole));
 					}}
 				>
 					<h2>Permissão</h2>
@@ -149,9 +151,7 @@
 					class="card form-card"
 					onsubmit={(event) => {
 						event.preventDefault();
-						update('status', () =>
-							adminApi.updateUserStatus(user!.token, userId(), selectedStatus)
-						);
+						update('status', (token) => adminApi.updateUserStatus(token, userId(), selectedStatus));
 					}}
 				>
 					<h2>Status</h2>
@@ -172,8 +172,8 @@
 							error = 'Informe o ID do casamento para alterar o plano.';
 							return;
 						}
-						update('plan', () =>
-							adminApi.updateUserPlan(user!.token, userId(), {
+						update('plan', (token) =>
+							adminApi.updateUserPlan(token, userId(), {
 								weddingId,
 								planCode: planCode || null
 							})
